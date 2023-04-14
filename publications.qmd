@@ -1,0 +1,32 @@
+---
+title: "Publications"
+listing:
+  template: publications.ejs
+  contents: 
+    - name: Hybrid scheme for secure communications using quantum and classical mechanisms
+      href: https://ieeexplore.ieee.org/document/8166458
+      type: conference
+    - name: A New Quantum Encryption Scheme
+      href: https://journals.aijr.org/index.php/ajgr/article/view/699/168
+      type: journal
+    - name: Using quantum communications for maritime signal flags
+      href: https://www.researchgate.net/publication/355884306_Using_quantum_communications_for_maritime_signal_flags
+      type: conference
+    - name: A quantum safe analysis of Helios voting system
+      href: https://acad.ro/sectii2002/proceedings/doc2020-1/07-Plesa.pdf
+      type: journal
+    - name: "Privacy-Preserving Clustering: A New Approach Based on Invariant Order Encryption"
+      href: https://jmiltechnol.mta.ro/6/10_PLESA,%20PLESCA-min.pdf
+      type: journal
+    - name: Self-repairing mechanical components using artificial Intelligence
+      href: https://www.researchgate.net/publication/355264476_Self-repairing_mechanical_components_using_artificial_Intelligence
+      type: journal
+    - name: Anonymous Spam Detection Service Based on Somewhat Homomorphic Encryption
+      href: https://ijisrt.com/assets/upload/files/IJISRT21APR375.pdf
+      type: journal
+    - name: A key agreement protocol based on spiking neural P systems with anti-spikes
+      href: https://link.springer.com/article/10.1007/s41965-022-00110-9
+      type: journal
+    
+---
+

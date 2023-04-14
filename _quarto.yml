@@ -1,0 +1,21 @@
+project:
+  type: website
+
+website:
+  title: "Blog"
+  navbar:
+    right:
+      - presentations.qmd
+      - publications.qmd
+      - about.qmd
+      - icon: github
+        href: https://github.com/miiip
+      - icon: twitter
+        href: https://twitter.com/miiipus
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+
+
+

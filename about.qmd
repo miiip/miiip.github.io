@@ -1,0 +1,21 @@
+---
+title: "About"
+image: profile.jpeg
+about:
+  template: jolla
+  links:
+    - icon: twitter
+      text: Twitter
+      href: https://twitter.com/miiipus
+    - icon: linkedin
+      text: LinkedIn
+      href: https://www.linkedin.com/in/mihail-iulian-plesa-ab7838249/
+    - icon: github
+      text: Github
+      href: https://github.com/miiip
+
+---
+
+Hi there!
+
+My name is Mihail (the guy next to that adorable little girl). I’m a research security engineer. This means I read research papers, publish new ideas and implement various cybersecurity tools. My research focuses on machine learning applications in cybersecurity and privacy. I’m also a Ph.D. student at the Faculty of Mathematics and Informatics of the University of Bucharest. My thesis is about applications of Spiking Neural P systems in cybersecurity and especially in cryptography.
