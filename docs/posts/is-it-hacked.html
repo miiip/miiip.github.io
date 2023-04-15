@@ -142,6 +142,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </i> 
  <span class="menu-text"></span></a>
   </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="../index.xml" rel="" target=""><i class="bi bi-rss" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
 </ul>
             <div class="quarto-navbar-tools">
 </div>
@@ -199,7 +204,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
 <p>In this short tutorial, we construct a simple classifier for detecting web defacement using fast.ai library. Currently, I’m taking Jeremy Howard’s course (<a href="https://course.fast.ai">Practical Deep Learning for Coders - Part 1</a>) and I’m thrilled about it. I’ve coded various DL models in the past (especially for cybersecurity), but I only used TensorFlow. Recently, I wanted to try PyTorch since it seems that it takes over the market. In the past, I had heard of fastai as a PyTorch-based library, but because I was using TensorFlow, I didn’t pay much attention to it. Now, I’m impressed by what this library can do and I want to share this with you. Don’t expect to see a state-of-the-art model, I’m only experimenting with fastai for cybersecurity related problems 😁</p>
-<p>Just to be more clear: you know when a website is hacked and the hackers display some message on the home page? <img src="is-it-hacked_files/figure-html/5e50c68d-1-93f41ad3-015e-4b2c-a6b2-b4dd6f875363.png" class="img-fluid" alt="image.png"></p>
+<p>Just to be more clear: you know when a website is hacked and the hackers display some message on the home page? <img src="is-it-hacked_files/figure-html/ee23ca87-1-93f41ad3-015e-4b2c-a6b2-b4dd6f875363.png" class="img-fluid" alt="image.png"></p>
 <p>This is web defacement and this we are trying to detect it. Why? Well, if your site was defaced, the first thing you do is to put it in maintenance mode. Wouldn’t it be nice if you had a DL model that would warn you instantly when a website has been defaced? If you want to know how you might do that, keep reading 🤓</p>
 </section>
 <section id="step-1-download-images-of-defaced-and-non-defaced-websites" class="level2">
@@ -521,8 +526,7 @@ Probability it's a defaced: 0.9962</code></pre>
 </section>
 <section id="conclusions" class="level2">
 <h2 class="anchored" data-anchor-id="conclusions">Conclusions</h2>
-<p>In this short blog post, we constructed a simple classifier to detect web defacement. Our classifier gets 80% accuracy on the validation dataset. I will continue to improve it as I follow the course, so stay tuned 😎</p>
-<p>This post is based on the <a href="https://www.kaggle.com/code/jhoward/is-it-a-bird-creating-a-model-from-your-own-data">first lab</a> of the <a href="https://course.fast.ai">fast.ai</a> coure so thank you <a href="https://twitter.com/jeremyphoward">Jeremy Howard</a> 😃 <img src="https://pbs.twimg.com/media/Ff_o_toXgAELiDm?format=jpg&amp;name=medium.png" class="img-fluid"></p>
+<p>In this short blog post, we constructed a simple classifier to detect web defacement. Our classifier gets 80% accuracy on the validation dataset. I will continue to improve it as I follow the course, so stay tuned 😎 This post is based on the <a href="https://www.kaggle.com/code/jhoward/is-it-a-bird-creating-a-model-from-your-own-data">first lab</a> of the <a href="https://course.fast.ai">fast.ai</a> coure so thank you <a href="https://twitter.com/jeremyphoward">Jeremy Howard</a> 😃 <img src="is-it-hacked_files/figure-html/0cd8550f-1-image.png" class="img-fluid" alt="image.png"></p>
 
 
 </section>

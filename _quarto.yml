@@ -3,6 +3,8 @@ project:
   output-dir: docs
 website:
   title: "Blog"
+  site-url: "https://miiip.github.io"
+  description: "A blog about various applications of AI in cybersecurity and privacy"
   navbar:
     right:
       - presentations.qmd
@@ -12,6 +14,8 @@ website:
         href: https://github.com/miiip
       - icon: twitter
         href: https://twitter.com/miiipus
+      - icon: rss
+        href: index.xml
 format:
   html:
     theme: cosmo
