@@ -1,0 +1,12 @@
+---
+title: "Presentations"
+listing:
+  template: presentations.ejs
+  contents:
+    - name: How to implement a quantum key distribution protocol on IBM's quantum computer (a practical example of quantum programming)
+      href: https://www.youtube.com/watch?v=7o3vTOYTbNs
+      custom-field: DefCamp 2019 presentation
+    - name: Augment cybersecurity through A.I.
+      href: https://www.youtube.com/watch?v=ylBXFXAOQb8&list=PLnwq8gv9MEKhdLwpk7tYvODISE3yU8htc&index=40
+      custom-field: DefCamp 2022 presentation
+---

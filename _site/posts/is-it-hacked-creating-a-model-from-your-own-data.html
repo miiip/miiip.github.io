@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.321">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Mihail Plesa">
+<meta name="dcterms.date" content="2023-04-15">
+
+<title>Blog - Using fast.ai to detect web defacement</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Blog</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../presentations.html" rel="" target="">
+ <span class="menu-text">Presentations</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../publications.html" rel="" target="">
+ <span class="menu-text">Publications</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/miiip" rel="" target=""><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/miiipus" rel="" target=""><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Using fast.ai to detect web defacement</h1>
+                                <div class="quarto-categories">
+                <div class="quarto-category">ideas</div>
+                <div class="quarto-category">code</div>
+                <div class="quarto-category">ml-cyber</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Mihail Plesa </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">April 15, 2023</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="is-it-a-bird" class="level2">
+<h2 class="anchored" data-anchor-id="is-it-a-bird">Is it a bird?</h2>
+<p>In 2015 the idea of creating a computer system that could recognise birds was considered so outrageously challenging that it was the basis of <a href="https://xkcd.com/1425/">this XKCD joke</a>:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="is-it-hacked-creating-a-model-from-your-own-data_files/figure-html/a4c01c59-1-a0483178-c30e-4fdd-b2c2-349e130ab260.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">image.png</figcaption><p></p>
+</figure>
+</div>
+<p>But today, we can do exactly that, in just a few minutes, using entirely free resources!</p>
+<p>The basic steps we’ll take are:</p>
+<ol type="1">
+<li>Use DuckDuckGo to search for images of “bird photos”</li>
+<li>Use DuckDuckGo to search for images of “forest photos”</li>
+<li>Fine-tune a pretrained neural network to recognise these two groups</li>
+<li>Try running this model on a picture of a bird and see if it works.</li>
+</ol>
+</section>
+<section id="step-1-download-images-of-birds-and-non-birds" class="level2">
+<h2 class="anchored" data-anchor-id="step-1-download-images-of-birds-and-non-birds">Step 1: Download images of birds and non-birds</h2>
+<p>::: {.cell _kg_hide-input=‘true’ execution=‘{“iopub.execute_input”:“2023-04-12T04:20:53.650799Z”,“iopub.status.busy”:“2023-04-12T04:20:53.650486Z”,“iopub.status.idle”:“2023-04-12T04:20:53.655767Z”,“shell.execute_reply”:“2023-04-12T04:20:53.655037Z”,“shell.execute_reply.started”:“2023-04-12T04:20:53.650765Z”}’ trusted=‘true’ execution_count=4}</p>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> duckduckgo_search <span class="im">import</span> ddg_images</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastcore.<span class="bu">all</span> <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> search_images(term, max_images<span class="op">=</span><span class="dv">30</span>):</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Searching for '</span><span class="sc">{</span>term<span class="sc">}</span><span class="ss">'"</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> L(ddg_images(term, max_results<span class="op">=</span>max_images)).itemgot(<span class="st">'image'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>:::</p>
+<p>Let’s start by searching for a bird photo and seeing what kind of result we get. We’ll start by getting URLs from a search:</p>
+<div class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2023-04-12T04:41:18.842815Z&quot;,&quot;iopub.status.busy&quot;:&quot;2023-04-12T04:41:18.842535Z&quot;,&quot;iopub.status.idle&quot;:&quot;2023-04-12T04:41:19.442496Z&quot;,&quot;shell.execute_reply&quot;:&quot;2023-04-12T04:41:19.441764Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2023-04-12T04:41:18.842783Z&quot;}" data-trusted="true" data-execution_count="25">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#NB: `search_images` depends on duckduckgo.com, which doesn't always return correct responses.</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">#    If you get a JSON error, just try running it again (it may take a couple of tries).</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>urls <span class="op">=</span> search_images(<span class="st">'example of defaced webpage'</span>, max_images<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>urls[<span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Searching for 'example of defaced webpage'</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="25">
+<pre><code>'https://blog.sucuri.net/wp-content/uploads/2020/04/image1-600x419.png'</code></pre>
+</div>
+</div>
+<p>…and then download a URL and take a look at it:</p>
+<div class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2023-04-12T04:41:30.489791Z&quot;,&quot;iopub.status.busy&quot;:&quot;2023-04-12T04:41:30.489533Z&quot;,&quot;iopub.status.idle&quot;:&quot;2023-04-12T04:41:31.095969Z&quot;,&quot;shell.execute_reply&quot;:&quot;2023-04-12T04:41:31.095118Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2023-04-12T04:41:30.489760Z&quot;}" data-trusted="true" data-execution_count="26">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastdownload <span class="im">import</span> download_url</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>dest <span class="op">=</span> <span class="st">'defaced.jpg'</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>download_url(urls[<span class="dv">0</span>], dest, show_progress<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastai.vision.<span class="bu">all</span> <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>im <span class="op">=</span> Image.<span class="bu">open</span>(dest)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>im.to_thumb(<span class="dv">256</span>,<span class="dv">256</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="26">
+<p><img src="is-it-hacked-creating-a-model-from-your-own-data_files/figure-html/cell-4-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Now let’s do the same with “forest photos”:</p>
+<div class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2023-04-12T04:43:39.679908Z&quot;,&quot;iopub.status.busy&quot;:&quot;2023-04-12T04:43:39.679603Z&quot;,&quot;iopub.status.idle&quot;:&quot;2023-04-12T04:43:40.551534Z&quot;,&quot;shell.execute_reply&quot;:&quot;2023-04-12T04:43:40.550754Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2023-04-12T04:43:39.679855Z&quot;}" data-trusted="true" data-execution_count="29">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>download_url(search_images(<span class="st">'example of normal webpage'</span>, max_images<span class="op">=</span><span class="dv">1</span>)[<span class="dv">0</span>], <span class="st">'non-defaced.jpg'</span>, show_progress<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>Image.<span class="bu">open</span>(<span class="st">'non-defaced.jpg'</span>).to_thumb(<span class="dv">256</span>,<span class="dv">256</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Searching for 'example of normal webpage'</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="29">
+<p><img src="is-it-hacked-creating-a-model-from-your-own-data_files/figure-html/cell-5-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Our searches seem to be giving reasonable results, so let’s grab a few examples of each of “bird” and “forest” photos, and save each group of photos to a different folder (I’m also trying to grab a range of lighting conditions here):</p>
+<div class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2023-04-12T04:37:31.420677Z&quot;,&quot;iopub.status.busy&quot;:&quot;2023-04-12T04:37:31.419722Z&quot;,&quot;iopub.status.idle&quot;:&quot;2023-04-12T04:37:32.405669Z&quot;,&quot;shell.execute_reply&quot;:&quot;2023-04-12T04:37:32.404801Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2023-04-12T04:37:31.420636Z&quot;}" data-trusted="true" data-execution_count="24">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>ls</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>__notebook_source__.ipynb  bird_or_not  forest.jpg
+bird.jpg           defaced.jpg  non-defaced.jpg</code></pre>
+</div>
+</div>
+<div class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2023-04-12T04:44:46.052069Z&quot;,&quot;iopub.status.busy&quot;:&quot;2023-04-12T04:44:46.051665Z&quot;,&quot;iopub.status.idle&quot;:&quot;2023-04-12T04:46:12.394662Z&quot;,&quot;shell.execute_reply&quot;:&quot;2023-04-12T04:46:12.393651Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2023-04-12T04:44:46.052028Z&quot;}" data-trusted="true" data-execution_count="30">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>searches <span class="op">=</span> <span class="st">'defaced webpage'</span>,<span class="st">'normal webpage'</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>path <span class="op">=</span> Path(<span class="st">'defaced_or_not'</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> time <span class="im">import</span> sleep</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> o <span class="kw">in</span> searches:</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    dest <span class="op">=</span> (path<span class="op">/</span>o)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(path, o , dest)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    dest.mkdir(exist_ok<span class="op">=</span><span class="va">True</span>, parents<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    download_images(dest, urls<span class="op">=</span>search_images(<span class="ss">f'example of an university </span><span class="sc">{</span>o<span class="sc">}</span><span class="ss">'</span>))</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    sleep(<span class="dv">10</span>)</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    download_images(dest, urls<span class="op">=</span>search_images(<span class="ss">f'example of a governmental </span><span class="sc">{</span>o<span class="sc">}</span><span class="ss">'</span>))</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    sleep(<span class="dv">10</span>)</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    download_images(dest, urls<span class="op">=</span>search_images(<span class="ss">f'example of a finance institution </span><span class="sc">{</span>o<span class="sc">}</span><span class="ss">'</span>))</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    sleep(<span class="dv">10</span>)</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    resize_images(path<span class="op">/</span>o, max_size<span class="op">=</span><span class="dv">400</span>, dest<span class="op">=</span>path<span class="op">/</span>o)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>defaced_or_not defaced webpage defaced_or_not/defaced webpage
+Searching for 'example of an university defaced webpage'
+Searching for 'example of a governmental defaced webpage'
+Searching for 'example of a finance institution defaced webpage'
+defaced_or_not normal webpage defaced_or_not/normal webpage
+Searching for 'example of an university normal webpage'
+Searching for 'example of a governmental normal webpage'
+Searching for 'example of a finance institution normal webpage'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/opt/conda/lib/python3.7/site-packages/PIL/Image.py:963: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  "Palette images with Transparency expressed in bytes should be "
+/opt/conda/lib/python3.7/site-packages/PIL/Image.py:963: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  "Palette images with Transparency expressed in bytes should be "
+/opt/conda/lib/python3.7/site-packages/PIL/Image.py:1018: UserWarning: Couldn't allocate palette entry for transparency
+  warnings.warn("Couldn't allocate palette entry for transparency")</code></pre>
+</div>
+</div>
+<div class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2023-04-12T04:47:07.564708Z&quot;,&quot;iopub.status.busy&quot;:&quot;2023-04-12T04:47:07.564413Z&quot;,&quot;iopub.status.idle&quot;:&quot;2023-04-12T04:47:08.547585Z&quot;,&quot;shell.execute_reply&quot;:&quot;2023-04-12T04:47:08.546646Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2023-04-12T04:47:07.564677Z&quot;}" data-trusted="true" data-execution_count="33">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>ls defaced_or_not</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>'defaced webpage'  'normal webpage'</code></pre>
+</div>
+</div>
+<div class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2023-04-12T04:47:25.055752Z&quot;,&quot;iopub.status.busy&quot;:&quot;2023-04-12T04:47:25.055466Z&quot;,&quot;iopub.status.idle&quot;:&quot;2023-04-12T04:47:25.061642Z&quot;,&quot;shell.execute_reply&quot;:&quot;2023-04-12T04:47:25.060789Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2023-04-12T04:47:25.055721Z&quot;}" data-trusted="true" data-execution_count="34">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(os.listdir(path<span class="op">/</span><span class="st">'defaced webpage'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>['1cea845b-8f24-44d6-b11f-a9e64301d95e.jpeg', 'c1d6233a-a8ad-4ebb-bf63-adf6ad0d5df0.jpg', '6133cd19-1b61-4dd6-bcec-9d3813adb8b0.png', '2705c10c-8100-44e6-8082-601d8761e733.png', '1a1004e4-b039-4646-b64f-d088f71ebbac.jpg', '0e33da56-8106-46c1-8c36-287912ad486a.jpg', 'c47a6f95-4055-4275-8421-7b9d36f29878.png', '9e38f77e-8445-42f4-9c65-868c15fc3af6.jpg', '7cbe0812-464b-4c41-a9d5-d15d6564375e.png', 'd1cf0d50-6501-435c-9239-9b3c2eeba0a6.jpg', '5027d237-71d5-4455-b36f-99664861ac57.png', '76b84e2d-b823-46db-9f02-b3ac454154b4.jpg', '98060270-3dd4-43de-93d2-53812c1df1f1.jpg', '0cb192fe-5fa0-4017-9a65-ab34a398c61d.png', '1f49066b-a9ba-418d-b583-adad6eced08f.jpg', '0ef1ef38-5ebb-4d7e-aecd-d2be90f68cc7.jpg', '9ad11dd8-c6ea-4076-ad7d-8ad121c8d71c.jpg', 'f5a042fc-4445-475a-abb9-c6ec6172b804.jpg', '3b6e4ba5-98c8-4d49-ab7d-5ecea8bf5eab.jpg', '251fc147-f9e4-44cf-a296-411b14f11fac.jpg', '4edf3e27-cad0-408f-8558-d02b9c9438e6.jpg', 'a164042c-4920-4b4c-8009-5d034f094083.jpg', '53bf63f2-3084-487a-834a-18f5510dd893.png', '03ab9ead-bf6d-4180-a11f-d56e069ae56c.jpg', '4f897bc6-e910-4a8a-b80d-722b7734cce1.jpg', 'f0c33720-f267-4c07-8216-b3a08fa84ff2.png', 'f554f21c-6198-4c34-b04c-c90c6fe77795.png', '695bd1f9-cc0e-40cf-80ea-78f4da0a497b.jpg', '4fa86c78-2326-4853-9ece-1f753233176b.jpg', '003da304-6be8-479d-be22-93f6bfb778b1.jpg', 'e8fcf9ea-5e46-4839-800f-0bc73cb31efa.png', 'a8301f37-0a92-45dc-965a-5de50ffef513.jpg', 'b479dfa1-8401-49ef-a5d7-19b3a68b1f1c.png', '15372577-42c6-4f81-aefe-45219c5e01ad.png', '293bcc32-854d-47ec-a4ff-11d8c61523f2.jpg', '32af3bfa-717b-4a67-8e3f-897172db62cd.jpg', 'f1c2bf97-67a9-46b7-8133-b4cce482cd60.jpg', '12cdb368-83ae-4f3b-912d-f6a141fd6cd7.jpg', 'f043721b-3277-4eab-abd2-b34100cfe117.jpg', 'e3836282-ced6-43b2-8dd7-61222c5a166b.jpg', '69098d04-43dd-40a5-949d-ca9f6fc2bf46.jpg', '9ff76d90-0a0a-442d-931e-a7ac323913e0.jpg', 'f336ae85-10c4-492f-a834-7b8f729a4782.jpg', 'c5b55513-625d-4832-9fef-5f804906a01e.jpg', 'c384fe36-fddc-42f6-9cbc-3eff5df179cb.png', '97556361-4a32-44a4-bf81-60484e5661a6.jpg', '16e431d4-d3f8-4890-a8c0-b9e452ff0122.jpg', 'e871a1d0-90ea-4c22-9c22-6a49df3aafe8.jpg', 'f5be9771-ceb6-4110-b508-bc9b757fd9e2.png', '27f7de68-6c1b-4e00-9c99-870ffc71347d.jpg', 'c177199a-f8e6-46a4-88ac-59782a6fcca0.jpg', 'ffea5772-3602-4b4e-a49e-54ed0c8435f6.png', '6b3c7282-1fb7-426b-8f20-1f886ce6cac3.jpg', 'be687df0-d7d6-4c10-ad2a-968291b9c468.jpg', 'eba2aaef-7fb7-4fbe-b6a7-f66c82e5a5cc.jpg', 'e46052bc-fd36-42f4-b6bf-a2997779eb08.png', 'a23e0b94-febd-4af4-b118-8bab306e90b0.png', '344eb5a9-523c-476f-b17d-abb8ce2f2dd3.png', 'c07c3b26-dc23-4edd-81d2-7990c534a5ab.jpg', '39de6198-4424-4b46-9fdb-c87ab65bef66.png', '85e71683-8c0f-437e-b542-113c3280787c.gif', 'fc90175f-10a7-4d09-a8ee-378de8736b52.jpg', '9f5a3bb2-c012-4be5-afc3-b09f191ac4eb.jpg', '0113ba60-f861-4fdc-ab8b-eb9511495f4e.png', '8e683ba9-ac69-459f-bb65-2611737b6692.jpg', 'e06d2661-81b9-4dc0-a9fc-15b418b050d6.png', '05cefdc5-2961-4770-b308-b06a0fa82b2e.png', 'eaa1c6f5-910c-45d0-a7c4-9ac53c64b622.png', '7afd0834-855c-4c55-af31-3e40b2d6a6b9.jpg', '3ac9b16c-394c-407e-969e-f1e577fdb7db.jpg', '14627cb7-76e2-4414-9c49-e20ae6341be4.jpg', '2b612c7d-6144-4ba6-a16e-15133a059103.jpg', 'dbab70b0-50ec-4d78-9278-7f5441211793.png', 'fc244f3e-6d22-4bc4-9b4f-57699e0243b0.jpg', 'b42607a2-9678-47bc-8820-3d1cb9fdc00e.png', 'c650aeba-d676-4898-9bd5-094ad9fa4674.png', 'c40f4ee3-2eb9-479b-b297-2e2032bac1ac.png', '796bae6e-a55b-4064-b1b9-3b8823acb34e.jpg', '2d27f915-0a9b-4893-baf2-c6014d6175d6.jpg', 'b763e351-c5ab-4e8e-a0b6-52b137ce779e.jpeg', '80b2bd58-eaf5-4d44-96c2-b1da0a2b9f81.jpg', '818c08fb-5942-41f3-a9b8-40bdc923172e.png', '1f69ed29-89ee-4806-8fe5-34a2cd09220d.jpg', '9fe3d498-2788-4d67-b747-2a860b5f5835.png', '4cc88743-11ec-469b-96c5-52c17f5f6393.png', '7ea8585e-1302-4811-94c8-e224fea407d0.jpeg']</code></pre>
+</div>
+</div>
+</section>
+<section id="step-2-train-our-model" class="level2">
+<h2 class="anchored" data-anchor-id="step-2-train-our-model">Step 2: Train our model</h2>
+<p>Some photos might not download correctly which could cause our model training to fail, so we’ll remove them:</p>
+<div class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2023-04-12T04:47:28.590987Z&quot;,&quot;iopub.status.busy&quot;:&quot;2023-04-12T04:47:28.590380Z&quot;,&quot;iopub.status.idle&quot;:&quot;2023-04-12T04:47:29.161574Z&quot;,&quot;shell.execute_reply&quot;:&quot;2023-04-12T04:47:29.160845Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2023-04-12T04:47:28.590947Z&quot;}" data-trusted="true" data-execution_count="35">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>failed <span class="op">=</span> verify_images(get_image_files(path))</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>failed.<span class="bu">map</span>(Path.unlink)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="bu">len</span>(failed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="35">
+<pre><code>3</code></pre>
+</div>
+</div>
+<p>To train a model, we’ll need <code>DataLoaders</code>, which is an object that contains a <em>training set</em> (the images used to create a model) and a <em>validation set</em> (the images used to check the accuracy of a model – not used during training). In <code>fastai</code> we can create that easily using a <code>DataBlock</code>, and view sample images from it:</p>
+<div class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2023-04-12T04:47:37.496727Z&quot;,&quot;iopub.status.busy&quot;:&quot;2023-04-12T04:47:37.496447Z&quot;,&quot;iopub.status.idle&quot;:&quot;2023-04-12T04:47:38.355427Z&quot;,&quot;shell.execute_reply&quot;:&quot;2023-04-12T04:47:38.354745Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2023-04-12T04:47:37.496695Z&quot;}" data-trusted="true" data-execution_count="36">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>dls <span class="op">=</span> DataBlock(</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    blocks<span class="op">=</span>(ImageBlock, CategoryBlock), </span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    get_items<span class="op">=</span>get_image_files, </span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    splitter<span class="op">=</span>RandomSplitter(valid_pct<span class="op">=</span><span class="fl">0.2</span>, seed<span class="op">=</span><span class="dv">42</span>),</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    get_y<span class="op">=</span>parent_label,</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    item_tfms<span class="op">=</span>[Resize(<span class="dv">192</span>, method<span class="op">=</span><span class="st">'squish'</span>)]</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>).dataloaders(path, bs<span class="op">=</span><span class="dv">32</span>)</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>dls.show_batch(max_n<span class="op">=</span><span class="dv">9</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="is-it-hacked-creating-a-model-from-your-own-data_files/figure-html/cell-11-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Here what each of the <code>DataBlock</code> parameters means:</p>
+<pre><code>blocks=(ImageBlock, CategoryBlock),</code></pre>
+<p>The inputs to our model are images, and the outputs are categories (in this case, “bird” or “forest”).</p>
+<pre><code>get_items=get_image_files, </code></pre>
+<p>To find all the inputs to our model, run the <code>get_image_files</code> function (which returns a list of all image files in a path).</p>
+<pre><code>splitter=RandomSplitter(valid_pct=0.2, seed=42),</code></pre>
+<p>Split the data into training and validation sets randomly, using 20% of the data for the validation set.</p>
+<pre><code>get_y=parent_label,</code></pre>
+<p>The labels (<code>y</code> values) is the name of the <code>parent</code> of each file (i.e.&nbsp;the name of the folder they’re in, which will be <em>bird</em> or <em>forest</em>).</p>
+<pre><code>item_tfms=[Resize(192, method='squish')]</code></pre>
+<p>Before training, resize each image to 192x192 pixels by “squishing” it (as opposed to cropping it).</p>
+<p>Now we’re ready to train our model. The fastest widely used computer vision model is <code>resnet18</code>. You can train this in a few minutes, even on a CPU! (On a GPU, it generally takes under 10 seconds…)</p>
+<p><code>fastai</code> comes with a helpful <code>fine_tune()</code> method which automatically uses best practices for fine tuning a pre-trained model, so we’ll use that.</p>
+<div class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2023-04-12T04:50:51.936411Z&quot;,&quot;iopub.status.busy&quot;:&quot;2023-04-12T04:50:51.935589Z&quot;,&quot;iopub.status.idle&quot;:&quot;2023-04-12T04:51:05.295978Z&quot;,&quot;shell.execute_reply&quot;:&quot;2023-04-12T04:51:05.295223Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2023-04-12T04:50:51.936371Z&quot;}" data-trusted="true" data-execution_count="42">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>learn <span class="op">=</span> vision_learner(dls, resnet50, metrics<span class="op">=</span>error_rate)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>learn.fine_tune(<span class="dv">8</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">epoch</th>
+<th data-quarto-table-cell-role="th">train_loss</th>
+<th data-quarto-table-cell-role="th">valid_loss</th>
+<th data-quarto-table-cell-role="th">error_rate</th>
+<th data-quarto-table-cell-role="th">time</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>1.161769</td>
+<td>1.304828</td>
+<td>0.454545</td>
+<td>00:01</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">epoch</th>
+<th data-quarto-table-cell-role="th">train_loss</th>
+<th data-quarto-table-cell-role="th">valid_loss</th>
+<th data-quarto-table-cell-role="th">error_rate</th>
+<th data-quarto-table-cell-role="th">time</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>0.527830</td>
+<td>1.105486</td>
+<td>0.424242</td>
+<td>00:01</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>0.358313</td>
+<td>1.320968</td>
+<td>0.363636</td>
+<td>00:01</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td>0.292316</td>
+<td>1.910205</td>
+<td>0.333333</td>
+<td>00:01</td>
+</tr>
+<tr class="even">
+<td>3</td>
+<td>0.339704</td>
+<td>2.253515</td>
+<td>0.272727</td>
+<td>00:01</td>
+</tr>
+<tr class="odd">
+<td>4</td>
+<td>0.324205</td>
+<td>2.523444</td>
+<td>0.303030</td>
+<td>00:01</td>
+</tr>
+<tr class="even">
+<td>5</td>
+<td>0.299952</td>
+<td>2.851549</td>
+<td>0.272727</td>
+<td>00:01</td>
+</tr>
+<tr class="odd">
+<td>6</td>
+<td>0.269725</td>
+<td>3.016880</td>
+<td>0.272727</td>
+<td>00:01</td>
+</tr>
+<tr class="even">
+<td>7</td>
+<td>0.245702</td>
+<td>2.914296</td>
+<td>0.272727</td>
+<td>00:01</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Generally when I run this I see 70% (ahah let’s see if it’ll show 100% by the end of the course)accuracy on the validation set (although it might vary a bit from run to run).</p>
+<p>“Fine-tuning” a model means that we’re starting with a model someone else has trained using some other dataset (called the <em>pretrained model</em>), and adjusting the weights a little bit so that the model learns to recognise your particular dataset. In this case, the pretrained model was trained to recognise photos in <em>imagenet</em>, and widely-used computer vision dataset with images covering 1000 categories) For details on fine-tuning and why it’s important, check out the <a href="https://course.fast.ai/">free fast.ai course</a>.</p>
+</section>
+<section id="step-3-use-our-model-and-build-your-own" class="level2">
+<h2 class="anchored" data-anchor-id="step-3-use-our-model-and-build-your-own">Step 3: Use our model (and build your own!)</h2>
+<p>Let’s see what our model thinks about that bird we downloaded at the start:</p>
+<div class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2023-04-12T04:52:11.243392Z&quot;,&quot;iopub.status.busy&quot;:&quot;2023-04-12T04:52:11.243114Z&quot;,&quot;iopub.status.idle&quot;:&quot;2023-04-12T04:52:11.299254Z&quot;,&quot;shell.execute_reply&quot;:&quot;2023-04-12T04:52:11.298417Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2023-04-12T04:52:11.243361Z&quot;}" data-trusted="true" data-execution_count="43">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>is_defaced,_,probs <span class="op">=</span> learn.predict(PILImage.create(<span class="st">'defaced.jpg'</span>))</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"This is a: </span><span class="sc">{</span>is_defaced<span class="sc">}</span><span class="ss">."</span>)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Probability it's a bird: </span><span class="sc">{</span>probs[<span class="dv">0</span>]<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>This is a: defaced webpage.
+Probability it's a bird: 0.9970</code></pre>
+</div>
+</div>
+<p>Good job, resnet50 (I tried with a bigger model but Jeremy is right.. bigger model doesn’t necessarily mean better results). :)</p>
+<p>So, as you see, in the space of a few years, creating computer vision classification models has gone from “so hard it’s a joke” to “trivially easy and free”!</p>
+<p>It’s not just in computer vision. Thanks to deep learning, computers can now do many things which seemed impossible just a few years ago, including <a href="https://openai.com/dall-e-2/">creating amazing artworks</a>, and <a href="https://www.datanami.com/2022/04/22/googles-massive-new-language-model-can-explain-jokes/">explaining jokes</a>. It’s moving so fast that even experts in the field have trouble predicting how it’s going to impact society in the coming years.</p>
+<p>One thing is clear – it’s important that we all do our best to understand this technology, because otherwise we’ll get left behind!</p>
+<p>Now it’s your turn. Click “Copy &amp; Edit” and try creating your own image classifier using your own image searches!</p>
+<p>If you enjoyed this, please consider clicking the “upvote” button in the top-right – it’s very encouraging to us notebook authors to know when people appreciate our work.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

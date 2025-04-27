@@ -1,0 +1,620 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss  xmlns:atom="http://www.w3.org/2005/Atom" 
+      xmlns:media="http://search.yahoo.com/mrss/" 
+      xmlns:content="http://purl.org/rss/1.0/modules/content/" 
+      xmlns:dc="http://purl.org/dc/elements/1.1/" 
+      version="2.0">
+<channel>
+<title>Blog</title>
+<link>https://miiip.github.io/index.html</link>
+<atom:link href="https://miiip.github.io/index.xml" rel="self" type="application/rss+xml"/>
+<description>A blog about various applications of AI in cybersecurity and privacy</description>
+<generator>quarto-1.3.321</generator>
+<lastBuildDate>Fri, 14 Apr 2023 21:00:00 GMT</lastBuildDate>
+<item>
+  <title>Is it hacked?</title>
+  <dc:creator>Mihail Plesa</dc:creator>
+  <link>https://miiip.github.io/posts/is-it-hacked.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<section id="is-it-hacked" class="level1">
+<h1>Is it hacked?</h1>
+<section id="detecting-web-defacement-with-deep-learning-using-fastai-library" class="level2">
+<h2 class="anchored" data-anchor-id="detecting-web-defacement-with-deep-learning-using-fastai-library">Detecting web defacement with deep learning using fastai library</h2>
+</section>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>In this short tutorial, we construct a simple classifier for detecting web defacement using fast.ai library. Currently, I’m taking Jeremy Howard’s course (<a href="https://course.fast.ai">Practical Deep Learning for Coders - Part 1</a>) and I’m thrilled about it. I’ve coded various DL models in the past (especially for cybersecurity), but I only used TensorFlow. Recently, I wanted to try PyTorch since it seems that it takes over the market. In the past, I had heard of fastai as a PyTorch-based library, but because I was using TensorFlow, I didn’t pay much attention to it. Now, I’m impressed by what this library can do and I want to share this with you. Don’t expect to see a state-of-the-art model, I’m only experimenting with fastai for cybersecurity related problems 😁</p>
+<p>Just to be more clear: you know when a website is hacked and the hackers display some message on the home page? <img src="https://miiip.github.io/posts/is-it-hacked_files/figure-html/5914c99c-1-93f41ad3-015e-4b2c-a6b2-b4dd6f875363.png" class="img-fluid" alt="image.png"></p>
+<p>This is web defacement and this we are trying to detect it. Why? Well, if your site was defaced, the first thing you do is to put it in maintenance mode. Wouldn’t it be nice if you had a DL model that would warn you instantly when a website has been defaced? If you want to know how you might do that, keep reading 🤓</p>
+</section>
+<section id="step-1-download-images-of-defaced-and-non-defaced-websites" class="level2">
+<h2 class="anchored" data-anchor-id="step-1-download-images-of-defaced-and-non-defaced-websites">Step 1: Download images of defaced and non-defaced websites</h2>
+<p>We will use duckduckgo_search to construct our dataset of defaced and non-defaced websites.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> duckduckgo_search <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> ddg_images</span>
+<span id="cb1-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> fastcore.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">all</span> <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span></span>
+<span id="cb1-3"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> fastai.vision.widgets <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span></span></code></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> search_images(term, max_images<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span>):</span>
+<span id="cb2-2">    <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"Searching for '</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>term<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'"</span>)</span>
+<span id="cb2-3">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> L(ddg_images(term, max_results<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>max_images)).itemgot(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'image'</span>)</span></code></pre></div>
+</div>
+<p>Here is an example:</p>
+<div class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2023-04-15T12:27:17.200371Z&quot;,&quot;iopub.status.busy&quot;:&quot;2023-04-15T12:27:17.200074Z&quot;,&quot;iopub.status.idle&quot;:&quot;2023-04-15T12:27:17.970569Z&quot;,&quot;shell.execute_reply&quot;:&quot;2023-04-15T12:27:17.969709Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2023-04-15T12:27:17.200341Z&quot;}" data-trusted="true" data-execution_count="26">
+<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">urls <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> search_images(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'example of defaced webpage'</span>, max_images<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb3-2">urls[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Searching for 'example of defaced webpage'</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="26">
+<pre><code>'https://blog.sucuri.net/wp-content/uploads/2020/04/image1-600x419.png'</code></pre>
+</div>
+</div>
+<p>Now, we download the image from that URL and saved it locally in a file named defaced.jpg. To do this, we use another “fast” library called <a href="https://fastdownload.fast.aihttps://fastdownload.fast.ai">fastdownload</a>.</p>
+<div class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2023-04-15T11:54:39.292626Z&quot;,&quot;iopub.status.busy&quot;:&quot;2023-04-15T11:54:39.292424Z&quot;,&quot;iopub.status.idle&quot;:&quot;2023-04-15T11:54:39.418590Z&quot;,&quot;shell.execute_reply&quot;:&quot;2023-04-15T11:54:39.417644Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2023-04-15T11:54:39.292600Z&quot;}" data-trusted="true" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> fastdownload <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> download_url</span>
+<span id="cb6-2">dest <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'defaced.jpg'</span></span>
+<span id="cb6-3">download_url(urls[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>], dest, show_progress<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">False</span>)</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<pre><code>Path('defaced.jpg')</code></pre>
+</div>
+</div>
+<p>To check if we saved the right image, we open it using <a href="https://pillow.readthedocs.io/en/stable/">PIL</a>. The <a href="https://docs.fast.ai/vision.core.html#image.to_thumb">to_thumb</a> function produces a 256x256 thumbnail version of the image.</p>
+<div class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2023-04-15T11:54:39.420361Z&quot;,&quot;iopub.status.busy&quot;:&quot;2023-04-15T11:54:39.419997Z&quot;,&quot;iopub.status.idle&quot;:&quot;2023-04-15T11:54:39.771680Z&quot;,&quot;shell.execute_reply&quot;:&quot;2023-04-15T11:54:39.770965Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2023-04-15T11:54:39.420324Z&quot;}" data-trusted="true" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> fastai.vision.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">all</span> <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span></span>
+<span id="cb8-2">im <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> Image.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">open</span>(dest)</span>
+<span id="cb8-3">im.to_thumb(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">256</span>,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">256</span>)</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<p><img src="https://miiip.github.io/posts/is-it-hacked_files/figure-html/cell-6-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Now we repeat for a non-defaced website.</p>
+<div class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2023-04-15T11:54:42.885736Z&quot;,&quot;iopub.status.busy&quot;:&quot;2023-04-15T11:54:42.885439Z&quot;,&quot;iopub.status.idle&quot;:&quot;2023-04-15T11:54:43.706220Z&quot;,&quot;shell.execute_reply&quot;:&quot;2023-04-15T11:54:43.705358Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2023-04-15T11:54:42.885702Z&quot;}" data-trusted="true" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">download_url(search_images(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'example of normal webpage'</span>, max_images<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>], <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'non-defaced.jpg'</span>, show_progress<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">False</span>)</span>
+<span id="cb9-2">Image.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">open</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'non-defaced.jpg'</span>).to_thumb(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">256</span>,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">256</span>)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Searching for 'example of normal webpage'</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="7">
+<p><img src="https://miiip.github.io/posts/is-it-hacked_files/figure-html/cell-7-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Let’s build our dataset. We search for defaced and on-defaced websites.</p>
+<div class="cell" data-trusted="true">
+<div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1">searches <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'defaced website'</span>,<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'nice homepage site example'</span>]</span>
+<span id="cb11-2">local <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'d'</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'nd'</span>]</span>
+<span id="cb11-3">path <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> Path(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'defaced_or_not'</span>)</span>
+<span id="cb11-4"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> time <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> sleep</span>
+<span id="cb11-5"></span>
+<span id="cb11-6"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> idx <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>):</span>
+<span id="cb11-7">    dest <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (path<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span>local[idx])</span>
+<span id="cb11-8">    <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(path, local[idx] , dest)</span>
+<span id="cb11-9">    dest.mkdir(exist_ok<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>, parents<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>)</span>
+<span id="cb11-10">    download_images(dest, urls<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>search_images(searches[idx]))</span>
+<span id="cb11-11">    sleep(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>)</span>
+<span id="cb11-12">    resize_images(path<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span>local[idx], max_size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">400</span>, dest<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>path<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span>local[idx])</span></code></pre></div>
+</div>
+<p>Delete all images that were downloaded incorrectly.</p>
+<div class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2023-04-15T12:01:23.259125Z&quot;,&quot;iopub.status.busy&quot;:&quot;2023-04-15T12:01:23.258834Z&quot;,&quot;iopub.status.idle&quot;:&quot;2023-04-15T12:01:23.632877Z&quot;,&quot;shell.execute_reply&quot;:&quot;2023-04-15T12:01:23.631949Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2023-04-15T12:01:23.259070Z&quot;}" data-trusted="true" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1">failed <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> verify_images(get_image_files(path))</span>
+<span id="cb12-2">failed.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">map</span>(Path.unlink)</span>
+<span id="cb12-3"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(failed)</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="18">
+<pre><code>0</code></pre>
+</div>
+</div>
+<div class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2023-04-15T12:01:23.635062Z&quot;,&quot;iopub.status.busy&quot;:&quot;2023-04-15T12:01:23.634797Z&quot;,&quot;iopub.status.idle&quot;:&quot;2023-04-15T12:01:23.640746Z&quot;,&quot;shell.execute_reply&quot;:&quot;2023-04-15T12:01:23.640038Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2023-04-15T12:01:23.635026Z&quot;}" data-trusted="true" data-execution_count="19">
+<div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(os.listdir(path<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'d'</span>)))</span>
+<span id="cb14-2"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(os.listdir(path<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'nd'</span>)))</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>47
+48</code></pre>
+</div>
+</div>
+<p>We have 47 images of defaced websites and 48 images of non-defaced websites.</p>
+</section>
+<section id="step-2-train-the-model" class="level2">
+<h2 class="anchored" data-anchor-id="step-2-train-the-model">Step 2: Train the model</h2>
+<p>To train the model we first construct a <a href="https://docs.fast.ai/data.block.html">DataBlock</a>. In a <code>DataBlock</code> we specify how to split the data in training and validation, how to label the training images (defaced or non-defaced) and how to pre-process the images (for example, we resize all the images using a common dimension). Using <code>fastai</code> we can make all of these in a single line of code 🥹.</p>
+<div class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2023-04-15T12:01:36.228915Z&quot;,&quot;iopub.status.busy&quot;:&quot;2023-04-15T12:01:36.228628Z&quot;,&quot;iopub.status.idle&quot;:&quot;2023-04-15T12:01:36.990491Z&quot;,&quot;shell.execute_reply&quot;:&quot;2023-04-15T12:01:36.988763Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2023-04-15T12:01:36.228883Z&quot;}" data-trusted="true" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1">dls <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> DataBlock(</span>
+<span id="cb16-2">    blocks<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>(ImageBlock, CategoryBlock), </span>
+<span id="cb16-3">    get_items<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>get_image_files, </span>
+<span id="cb16-4">    splitter<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>RandomSplitter(valid_pct<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.2</span>, seed<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">42</span>),</span>
+<span id="cb16-5">    get_y<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>parent_label,</span>
+<span id="cb16-6">    item_tfms<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>[Resize(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">192</span>, method<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'squish'</span>)]</span>
+<span id="cb16-7">).dataloaders(path, bs<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">32</span>)</span>
+<span id="cb16-8"></span>
+<span id="cb16-9">dls.show_batch(max_n<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">9</span>)</span></code></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="https://miiip.github.io/posts/is-it-hacked_files/figure-html/cell-11-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Now we are ready to train the model. Here is the trick: we use something called transfer learning. We borrow the knowledge from a very big pre-trained model like <code>resnet18</code> and customize that knowledge for our use case. It’s like getting knowledge about mathematics in general and then getting specialized in derivatives</p>
+<div class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2023-04-15T12:01:48.230111Z&quot;,&quot;iopub.status.busy&quot;:&quot;2023-04-15T12:01:48.229826Z&quot;,&quot;iopub.status.idle&quot;:&quot;2023-04-15T12:02:02.945903Z&quot;,&quot;shell.execute_reply&quot;:&quot;2023-04-15T12:02:02.944976Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2023-04-15T12:01:48.230062Z&quot;}" data-trusted="true" data-execution_count="21">
+<div class="sourceCode cell-code" id="cb17" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1">learn <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> vision_learner(dls, resnet18, metrics<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>error_rate)</span>
+<span id="cb17-2">learn.fine_tune(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">8</span>)</span></code></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Downloading: "https://download.pytorch.org/models/resnet18-f37072fd.pth" to /root/.cache/torch/hub/checkpoints/resnet18-f37072fd.pth</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"487aa3bcd5874a86a06fc00140183a88","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">epoch</th>
+<th data-quarto-table-cell-role="th">train_loss</th>
+<th data-quarto-table-cell-role="th">valid_loss</th>
+<th data-quarto-table-cell-role="th">error_rate</th>
+<th data-quarto-table-cell-role="th">time</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>1.430695</td>
+<td>0.622086</td>
+<td>0.315789</td>
+<td>00:07</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">epoch</th>
+<th data-quarto-table-cell-role="th">train_loss</th>
+<th data-quarto-table-cell-role="th">valid_loss</th>
+<th data-quarto-table-cell-role="th">error_rate</th>
+<th data-quarto-table-cell-role="th">time</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>0.767509</td>
+<td>0.755880</td>
+<td>0.368421</td>
+<td>00:01</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>0.668098</td>
+<td>0.829260</td>
+<td>0.368421</td>
+<td>00:00</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td>0.580183</td>
+<td>0.730606</td>
+<td>0.315789</td>
+<td>00:00</td>
+</tr>
+<tr class="even">
+<td>3</td>
+<td>0.442123</td>
+<td>0.641195</td>
+<td>0.263158</td>
+<td>00:00</td>
+</tr>
+<tr class="odd">
+<td>4</td>
+<td>0.366080</td>
+<td>0.600636</td>
+<td>0.263158</td>
+<td>00:00</td>
+</tr>
+<tr class="even">
+<td>5</td>
+<td>0.301277</td>
+<td>0.524480</td>
+<td>0.210526</td>
+<td>00:00</td>
+</tr>
+<tr class="odd">
+<td>6</td>
+<td>0.254276</td>
+<td>0.463378</td>
+<td>0.105263</td>
+<td>00:00</td>
+</tr>
+<tr class="even">
+<td>7</td>
+<td>0.218404</td>
+<td>0.426965</td>
+<td>0.105263</td>
+<td>00:00</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>We get almost 90% accuracy on the validation dataset which is great for a first try 🥳</p>
+<p>Here is the confusion matrix for the validation dataset. The confusion matrix tells us the following:</p>
+<ol type="1">
+<li><p>How many defaced websites were labeled as defaced (True Positives)</p></li>
+<li><p>How many defaced websites were labeled as non-defaced (False negatives)</p></li>
+<li><p>How many non-defaced websites were labeled as defaced (False positives)</p></li>
+<li><p>How many non-defaced websites were labeled as non-defaced (True Negatives)</p></li>
+</ol>
+<div class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2023-04-15T12:02:16.504701Z&quot;,&quot;iopub.status.busy&quot;:&quot;2023-04-15T12:02:16.504411Z&quot;,&quot;iopub.status.idle&quot;:&quot;2023-04-15T12:02:17.236760Z&quot;,&quot;shell.execute_reply&quot;:&quot;2023-04-15T12:02:17.235697Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2023-04-15T12:02:16.504668Z&quot;}" data-trusted="true" data-execution_count="22">
+<div class="sourceCode cell-code" id="cb19" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1">interp <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> ClassificationInterpretation.from_learner(learn)</span>
+<span id="cb19-2">interp.plot_confusion_matrix()</span></code></pre></div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="https://miiip.github.io/posts/is-it-hacked_files/figure-html/cell-13-output-5.png" class="img-fluid"></p>
+</div>
+</div>
+</section>
+<section id="step-3-use-the-model" class="level2">
+<h2 class="anchored" data-anchor-id="step-3-use-the-model">Step 3: Use the model</h2>
+<p>Let’s see what our model thinks about that defaced.jpg we downloaded at the start:</p>
+<div class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2023-04-15T12:02:35.339790Z&quot;,&quot;iopub.status.busy&quot;:&quot;2023-04-15T12:02:35.338975Z&quot;,&quot;iopub.status.idle&quot;:&quot;2023-04-15T12:02:35.393481Z&quot;,&quot;shell.execute_reply&quot;:&quot;2023-04-15T12:02:35.392621Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2023-04-15T12:02:35.339750Z&quot;}" data-trusted="true" data-execution_count="23">
+<div class="sourceCode cell-code" id="cb20" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1">is_defaced,_,probs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> learn.predict(PILImage.create(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'defaced.jpg'</span>))</span>
+<span id="cb20-2"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"This is a: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>is_defaced<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">."</span>)</span>
+<span id="cb20-3"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"Probability it's a defaced: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>probs[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.4f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>This is a: d.
+Probability it's a defaced: 0.9962</code></pre>
+</div>
+</div>
+</section>
+<section id="conclusions" class="level2">
+<h2 class="anchored" data-anchor-id="conclusions">Conclusions</h2>
+<p>In this short blog post, we constructed a simple classifier to detect web defacement. Our classifier gets 80% accuracy on the validation dataset. I will continue to improve it as I follow the course, so stay tuned 😎</p>
+<p>This post is based on the <a href="https://www.kaggle.com/code/jhoward/is-it-a-bird-creating-a-model-from-your-own-data">first lab</a> of the <a href="https://course.fast.ai">fast.ai</a> coure so thank you <a href="https://twitter.com/jeremyphoward">Jeremy Howard</a> 😃 <img src="https://miiip.github.io/posts/is-it-hacked_files/figure-html/b9d2f0b6-1-785768e2-4b4e-494f-bfa3-e735bc0c0703.png" class="img-fluid" alt="image.png"></p>
+
+
+</section>
+</section>
+
+ ]]></description>
+  <category>ml-cybersecurity</category>
+  <guid>https://miiip.github.io/posts/is-it-hacked.html</guid>
+  <pubDate>Fri, 14 Apr 2023 21:00:00 GMT</pubDate>
+</item>
+</channel>
+</rss>
