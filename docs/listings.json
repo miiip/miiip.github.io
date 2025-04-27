@@ -2,15 +2,15 @@
   {
     "listing": "/index.html",
     "items": [
-      "/posts/is-it-hacked.html"
+      "/posts/Gaussian.html"
     ]
   },
   {
-    "listing": "/publications.html",
+    "listing": "/presentations.html",
     "items": []
   },
   {
-    "listing": "/presentations.html",
+    "listing": "/publications.html",
     "items": []
   }
 ]

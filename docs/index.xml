@@ -6,615 +6,1940 @@
       version="2.0">
 <channel>
 <title>Blog</title>
-<link>https://miiip.github.io/index.html</link>
+<link>https://miiip.github.io/</link>
 <atom:link href="https://miiip.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description>A blog about various applications of AI in cybersecurity and privacy</description>
-<generator>quarto-1.3.321</generator>
-<lastBuildDate>Fri, 14 Apr 2023 21:00:00 GMT</lastBuildDate>
+<generator>quarto-1.7.29</generator>
+<lastBuildDate>Sat, 26 Apr 2025 21:00:00 GMT</lastBuildDate>
 <item>
-  <title>Is it hacked?</title>
+  <title>A Shred of Light on the Smoothing Parameter in Lattices</title>
   <dc:creator>Mihail Plesa</dc:creator>
-  <link>https://miiip.github.io/posts/is-it-hacked.html</link>
+  <link>https://miiip.github.io/posts/Gaussian.html</link>
   <description><![CDATA[ 
 
 
 
 
-<section id="is-it-hacked" class="level1">
-<h1>Is it hacked?</h1>
-<section id="detecting-web-defacement-with-deep-learning-using-fastai-library" class="level2">
-<h2 class="anchored" data-anchor-id="detecting-web-defacement-with-deep-learning-using-fastai-library">Detecting web defacement with deep learning using fastai library</h2>
-</section>
-<section id="introduction" class="level2">
-<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
-<p>In this short tutorial, we construct a simple classifier for detecting web defacement using fast.ai library. Currently, I’m taking Jeremy Howard’s course (<a href="https://course.fast.ai">Practical Deep Learning for Coders - Part 1</a>) and I’m thrilled about it. I’ve coded various DL models in the past (especially for cybersecurity), but I only used TensorFlow. Recently, I wanted to try PyTorch since it seems that it takes over the market. In the past, I had heard of fastai as a PyTorch-based library, but because I was using TensorFlow, I didn’t pay much attention to it. Now, I’m impressed by what this library can do and I want to share this with you. Don’t expect to see a state-of-the-art model, I’m only experimenting with fastai for cybersecurity related problems 😁</p>
-<p>Just to be more clear: you know when a website is hacked and the hackers display some message on the home page? <img src="https://miiip.github.io/posts/is-it-hacked_files/figure-html/5914c99c-1-93f41ad3-015e-4b2c-a6b2-b4dd6f875363.png" class="img-fluid" alt="image.png"></p>
-<p>This is web defacement and this we are trying to detect it. Why? Well, if your site was defaced, the first thing you do is to put it in maintenance mode. Wouldn’t it be nice if you had a DL model that would warn you instantly when a website has been defaced? If you want to know how you might do that, keep reading 🤓</p>
-</section>
-<section id="step-1-download-images-of-defaced-and-non-defaced-websites" class="level2">
-<h2 class="anchored" data-anchor-id="step-1-download-images-of-defaced-and-non-defaced-websites">Step 1: Download images of defaced and non-defaced websites</h2>
-<p>We will use duckduckgo_search to construct our dataset of defaced and non-defaced websites.</p>
-<div class="cell">
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>If you’ve delved into lattice-based cryptography, you’ve probably encountered the intriguing concept of the smoothing parameter. In this post, we’ll break it down step by step, “reverse engineering” this essential lattice parameter. The aim? To help you develop a clear and intuitive understanding of it—rooted in solid mathematical principles (and maybe a touch of fun)! 😊</p>
+<p>One of the standout features of lattice-based cryptography is its robust worst-case to average-case reduction security proof. Here’s the essence: when we set up a lattice-based cryptosystem, elements like secret keys and noise are generated randomly. If we assume an attacker cannot solve the underlying mathematical problem for a random instance, the system is said to have average-case security. But lattice-based cryptography takes this a step further. It provides rigorous proofs showing that solving a random (average-case) instance of certain lattice problems is at least as hard as solving the worst-case instance of a related problem. In simpler terms, if an attacker can break a random instance, they can also crack the hardest instances. This foundational property greatly boosts our confidence in the security of lattice-based cryptography.</p>
+<p>Let’s begin with the big picture: many security proofs in the lattice world rely on the following structure:</p>
+<ol type="1">
+<li>Choose a lattice point.<br>
+</li>
+<li>Randomly generate a noise vector.<br>
+</li>
+<li>Add the noise to the lattice point and reduce the result modulo the fundamental domain.</li>
+</ol>
+<p>To make this more concrete, consider an example in <img src="https://latex.codecogs.com/png.latex?%5Cmathbb%7BR%7D%5E2">. Here, the chosen lattice point is represented by the green point, the noise by the red vector, the sum of the two by the blue point, and the reduction modulo the fundamental domain (the hashed area) by the ‘x’ point.</p>
+<p>For clarity and completeness, let’s introduce some notations:</p>
+<ol type="1">
+<li><img src="https://latex.codecogs.com/png.latex?L"> represents the lattice.<br>
+</li>
+<li><img src="https://latex.codecogs.com/png.latex?B%20%5Cin%20%5Cmathbb%7BR%7D%5E%7Bn%20%5Ctimes%20n%7D"> is the basis of the lattice <img src="https://latex.codecogs.com/png.latex?L">.<br>
+</li>
+<li><img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BP%7D(B)"> denotes the fundamental domain of the lattice.</li>
+</ol>
+<p>This structure forms the foundation for understanding key concepts in lattice-based cryptography.</p>
+<div id="8b382abf" class="cell" data-execution_count="2">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
 background-color: null;
-font-style: inherit;">from</span> duckduckgo_search <span class="im" style="color: #00769E;
+font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
 background-color: null;
-font-style: inherit;">import</span> ddg_images</span>
+font-style: inherit;">as</span> np</span>
 <span id="cb1-2"><span class="im" style="color: #00769E;
 background-color: null;
-font-style: inherit;">from</span> fastcore.<span class="bu" style="color: null;
+font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
 background-color: null;
-font-style: inherit;">all</span> <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span></span>
+font-style: inherit;">as</span> plt</span>
 <span id="cb1-3"><span class="im" style="color: #00769E;
 background-color: null;
-font-style: inherit;">from</span> fastai.vision.widgets <span class="im" style="color: #00769E;
+font-style: inherit;">from</span> matplotlib.patches <span class="im" style="color: #00769E;
 background-color: null;
-font-style: inherit;">import</span> <span class="op" style="color: #5E5E5E;
+font-style: inherit;">import</span> Polygon</span>
+<span id="cb1-4"></span>
+<span id="cb1-5"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">*</span></span></code></pre></div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="kw" style="color: #003B4F;
+font-style: inherit;"># Function to generate lattice points</span></span>
+<span id="cb1-6"><span class="kw" style="color: #003B4F;
 background-color: null;
-font-style: inherit;">def</span> search_images(term, max_images<span class="op" style="color: #5E5E5E;
+font-weight: bold;
+font-style: inherit;">def</span> generate_lattice(basis, x_range, y_range):</span>
+<span id="cb1-7">    points <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+font-style: inherit;">=</span> []</span>
+<span id="cb1-8">    <span class="cf" style="color: #003B4F;
 background-color: null;
-font-style: inherit;">50</span>):</span>
-<span id="cb2-2">    <span class="bu" style="color: null;
+font-weight: bold;
+font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
 background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"Searching for '</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>term<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'"</span>)</span>
-<span id="cb2-3">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">return</span> L(ddg_images(term, max_results<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>max_images)).itemgot(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'image'</span>)</span></code></pre></div>
-</div>
-<p>Here is an example:</p>
-<div class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2023-04-15T12:27:17.200371Z&quot;,&quot;iopub.status.busy&quot;:&quot;2023-04-15T12:27:17.200074Z&quot;,&quot;iopub.status.idle&quot;:&quot;2023-04-15T12:27:17.970569Z&quot;,&quot;shell.execute_reply&quot;:&quot;2023-04-15T12:27:17.969709Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2023-04-15T12:27:17.200341Z&quot;}" data-trusted="true" data-execution_count="26">
-<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">urls <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> search_images(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'example of defaced webpage'</span>, max_images<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>)</span>
-<span id="cb3-2">urls[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>]</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Searching for 'example of defaced webpage'</code></pre>
-</div>
-<div class="cell-output cell-output-display" data-execution_count="26">
-<pre><code>'https://blog.sucuri.net/wp-content/uploads/2020/04/image1-600x419.png'</code></pre>
-</div>
-</div>
-<p>Now, we download the image from that URL and saved it locally in a file named defaced.jpg. To do this, we use another “fast” library called <a href="https://fastdownload.fast.aihttps://fastdownload.fast.ai">fastdownload</a>.</p>
-<div class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2023-04-15T11:54:39.292626Z&quot;,&quot;iopub.status.busy&quot;:&quot;2023-04-15T11:54:39.292424Z&quot;,&quot;iopub.status.idle&quot;:&quot;2023-04-15T11:54:39.418590Z&quot;,&quot;shell.execute_reply&quot;:&quot;2023-04-15T11:54:39.417644Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2023-04-15T11:54:39.292600Z&quot;}" data-trusted="true" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> fastdownload <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> download_url</span>
-<span id="cb6-2">dest <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'defaced.jpg'</span></span>
-<span id="cb6-3">download_url(urls[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>], dest, show_progress<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">False</span>)</span></code></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="5">
-<pre><code>Path('defaced.jpg')</code></pre>
-</div>
-</div>
-<p>To check if we saved the right image, we open it using <a href="https://pillow.readthedocs.io/en/stable/">PIL</a>. The <a href="https://docs.fast.ai/vision.core.html#image.to_thumb">to_thumb</a> function produces a 256x256 thumbnail version of the image.</p>
-<div class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2023-04-15T11:54:39.420361Z&quot;,&quot;iopub.status.busy&quot;:&quot;2023-04-15T11:54:39.419997Z&quot;,&quot;iopub.status.idle&quot;:&quot;2023-04-15T11:54:39.771680Z&quot;,&quot;shell.execute_reply&quot;:&quot;2023-04-15T11:54:39.770965Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2023-04-15T11:54:39.420324Z&quot;}" data-trusted="true" data-execution_count="6">
-<div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> fastai.vision.<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">all</span> <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span></span>
-<span id="cb8-2">im <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> Image.<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">open</span>(dest)</span>
-<span id="cb8-3">im.to_thumb(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">256</span>,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">256</span>)</span></code></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="6">
-<p><img src="https://miiip.github.io/posts/is-it-hacked_files/figure-html/cell-6-output-1.png" class="img-fluid"></p>
-</div>
-</div>
-<p>Now we repeat for a non-defaced website.</p>
-<div class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2023-04-15T11:54:42.885736Z&quot;,&quot;iopub.status.busy&quot;:&quot;2023-04-15T11:54:42.885439Z&quot;,&quot;iopub.status.idle&quot;:&quot;2023-04-15T11:54:43.706220Z&quot;,&quot;shell.execute_reply&quot;:&quot;2023-04-15T11:54:43.705358Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2023-04-15T11:54:42.885702Z&quot;}" data-trusted="true" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">download_url(search_images(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'example of normal webpage'</span>, max_images<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>)[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>], <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'non-defaced.jpg'</span>, show_progress<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">False</span>)</span>
-<span id="cb9-2">Image.<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">open</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'non-defaced.jpg'</span>).to_thumb(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">256</span>,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">256</span>)</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Searching for 'example of normal webpage'</code></pre>
-</div>
-<div class="cell-output cell-output-display" data-execution_count="7">
-<p><img src="https://miiip.github.io/posts/is-it-hacked_files/figure-html/cell-7-output-2.png" class="img-fluid"></p>
-</div>
-</div>
-<p>Let’s build our dataset. We search for defaced and on-defaced websites.</p>
-<div class="cell" data-trusted="true">
-<div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1">searches <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> [<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'defaced website'</span>,<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'nice homepage site example'</span>]</span>
-<span id="cb11-2">local <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> [<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'d'</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'nd'</span>]</span>
-<span id="cb11-3">path <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> Path(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'defaced_or_not'</span>)</span>
-<span id="cb11-4"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> time <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> sleep</span>
-<span id="cb11-5"></span>
-<span id="cb11-6"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">for</span> idx <span class="kw" style="color: #003B4F;
-background-color: null;
+font-weight: bold;
 font-style: inherit;">in</span> <span class="bu" style="color: null;
 background-color: null;
-font-style: inherit;">range</span>(<span class="dv" style="color: #AD0000;
+font-style: inherit;">range</span>(x_range[<span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">2</span>):</span>
-<span id="cb11-7">    dest <span class="op" style="color: #5E5E5E;
+font-style: inherit;">0</span>], x_range[<span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">=</span> (path<span class="op" style="color: #5E5E5E;
+font-style: inherit;">1</span>]):</span>
+<span id="cb1-9">        <span class="cf" style="color: #003B4F;
 background-color: null;
-font-style: inherit;">/</span>local[idx])</span>
-<span id="cb11-8">    <span class="bu" style="color: null;
+font-weight: bold;
+font-style: inherit;">for</span> j <span class="kw" style="color: #003B4F;
 background-color: null;
-font-style: inherit;">print</span>(path, local[idx] , dest)</span>
-<span id="cb11-9">    dest.mkdir(exist_ok<span class="op" style="color: #5E5E5E;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
 background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
+font-style: inherit;">range</span>(y_range[<span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">True</span>, parents<span class="op" style="color: #5E5E5E;
+font-style: inherit;">0</span>], y_range[<span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
+font-style: inherit;">1</span>]):</span>
+<span id="cb1-10">            point <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">True</span>)</span>
-<span id="cb11-10">    download_images(dest, urls<span class="op" style="color: #5E5E5E;
+font-style: inherit;">=</span> i <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span>search_images(searches[idx]))</span>
-<span id="cb11-11">    sleep(<span class="dv" style="color: #AD0000;
+font-style: inherit;">*</span> basis[:, <span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">10</span>)</span>
-<span id="cb11-12">    resize_images(path<span class="op" style="color: #5E5E5E;
+font-style: inherit;">0</span>] <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">/</span>local[idx], max_size<span class="op" style="color: #5E5E5E;
+font-style: inherit;">+</span> j <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> basis[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>]</span>
+<span id="cb1-11">            points.append(point)</span>
+<span id="cb1-12">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> np.array(points)</span>
+<span id="cb1-13"></span>
+<span id="cb1-14"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Function to reduce a point modulo the fundamental domain</span></span>
+<span id="cb1-15"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> reduce_mod_basis(point, basis):</span>
+<span id="cb1-16">    inv_basis <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.linalg.inv(basis)</span>
+<span id="cb1-17">    coeffs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.dot(inv_basis, point)</span>
+<span id="cb1-18">    coeffs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> coeffs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> np.floor(coeffs) <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Reduce coefficients mod 1</span></span>
+<span id="cb1-19">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> np.dot(basis, coeffs)</span>
+<span id="cb1-20"></span>
+<span id="cb1-21"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Define the lattice basis (2D) with larger vectors</span></span>
+<span id="cb1-22">basis <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.array([[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">6</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>], [<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>]])</span>
+<span id="cb1-23"></span>
+<span id="cb1-24"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Generate lattice points</span></span>
+<span id="cb1-25">lattice_points <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> generate_lattice(basis, x_range<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>), y_range<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>))</span>
+<span id="cb1-26"></span>
+<span id="cb1-27"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Select a lattice point (green dot)</span></span>
+<span id="cb1-28">lattice_point <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> basis[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> basis[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>] <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Example: (1, 1) in lattice coordinates</span></span>
+<span id="cb1-29"></span>
+<span id="cb1-30"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Add noise (larger random vector)</span></span>
+<span id="cb1-31">noise <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.uniform(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>, size<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">400</span>, dest<span class="op" style="color: #5E5E5E;
+font-style: inherit;">2</span>) <span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span>path<span class="op" style="color: #5E5E5E;
+font-style: inherit;"># Larger noise</span></span>
+<span id="cb1-32">noisy_point <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">/</span>local[idx])</span></code></pre></div>
-</div>
-<p>Delete all images that were downloaded incorrectly.</p>
-<div class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2023-04-15T12:01:23.259125Z&quot;,&quot;iopub.status.busy&quot;:&quot;2023-04-15T12:01:23.258834Z&quot;,&quot;iopub.status.idle&quot;:&quot;2023-04-15T12:01:23.632877Z&quot;,&quot;shell.execute_reply&quot;:&quot;2023-04-15T12:01:23.631949Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2023-04-15T12:01:23.259070Z&quot;}" data-trusted="true" data-execution_count="18">
-<div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1">failed <span class="op" style="color: #5E5E5E;
+font-style: inherit;">=</span> lattice_point <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span> verify_images(get_image_files(path))</span>
-<span id="cb12-2">failed.<span class="bu" style="color: null;
+font-style: inherit;">+</span> noise</span>
+<span id="cb1-33"></span>
+<span id="cb1-34"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">map</span>(Path.unlink)</span>
-<span id="cb12-3"><span class="bu" style="color: null;
+font-style: inherit;"># Reduce modulo the fundamental domain</span></span>
+<span id="cb1-35">reduced_point <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">len</span>(failed)</span></code></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="18">
-<pre><code>0</code></pre>
-</div>
-</div>
-<div class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2023-04-15T12:01:23.635062Z&quot;,&quot;iopub.status.busy&quot;:&quot;2023-04-15T12:01:23.634797Z&quot;,&quot;iopub.status.idle&quot;:&quot;2023-04-15T12:01:23.640746Z&quot;,&quot;shell.execute_reply&quot;:&quot;2023-04-15T12:01:23.640038Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2023-04-15T12:01:23.635026Z&quot;}" data-trusted="true" data-execution_count="19">
-<div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><span class="bu" style="color: null;
+font-style: inherit;">=</span> reduce_mod_basis(noisy_point, basis)</span>
+<span id="cb1-36"></span>
+<span id="cb1-37"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">print</span>(<span class="bu" style="color: null;
+font-style: inherit;"># Plot the lattice</span></span>
+<span id="cb1-38">plt.figure(figsize<span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">len</span>(os.listdir(path<span class="op" style="color: #5E5E5E;
+font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">/</span><span class="st" style="color: #20794D;
+font-style: inherit;">10</span>, <span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">'d'</span>)))</span>
-<span id="cb14-2"><span class="bu" style="color: null;
+font-style: inherit;">10</span>))</span>
+<span id="cb1-39">plt.scatter(lattice_points[:, <span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">print</span>(<span class="bu" style="color: null;
+font-style: inherit;">0</span>], lattice_points[:, <span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">len</span>(os.listdir(path<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'nd'</span>)))</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>47
-48</code></pre>
-</div>
-</div>
-<p>We have 47 images of defaced websites and 48 images of non-defaced websites.</p>
-</section>
-<section id="step-2-train-the-model" class="level2">
-<h2 class="anchored" data-anchor-id="step-2-train-the-model">Step 2: Train the model</h2>
-<p>To train the model we first construct a <a href="https://docs.fast.ai/data.block.html">DataBlock</a>. In a <code>DataBlock</code> we specify how to split the data in training and validation, how to label the training images (defaced or non-defaced) and how to pre-process the images (for example, we resize all the images using a common dimension). Using <code>fastai</code> we can make all of these in a single line of code 🥹.</p>
-<div class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2023-04-15T12:01:36.228915Z&quot;,&quot;iopub.status.busy&quot;:&quot;2023-04-15T12:01:36.228628Z&quot;,&quot;iopub.status.idle&quot;:&quot;2023-04-15T12:01:36.990491Z&quot;,&quot;shell.execute_reply&quot;:&quot;2023-04-15T12:01:36.988763Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2023-04-15T12:01:36.228883Z&quot;}" data-trusted="true" data-execution_count="20">
-<div class="sourceCode cell-code" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1">dls <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> DataBlock(</span>
-<span id="cb16-2">    blocks<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>(ImageBlock, CategoryBlock), </span>
-<span id="cb16-3">    get_items<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>get_image_files, </span>
-<span id="cb16-4">    splitter<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>RandomSplitter(valid_pct<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.2</span>, seed<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">42</span>),</span>
-<span id="cb16-5">    get_y<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>parent_label,</span>
-<span id="cb16-6">    item_tfms<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>[Resize(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">192</span>, method<span class="op" style="color: #5E5E5E;
+font-style: inherit;">1</span>], color<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span><span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">'squish'</span>)]</span>
-<span id="cb16-7">).dataloaders(path, bs<span class="op" style="color: #5E5E5E;
+font-style: inherit;">'black'</span>, s<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">32</span>)</span>
-<span id="cb16-8"></span>
-<span id="cb16-9">dls.show_batch(max_n<span class="op" style="color: #5E5E5E;
+font-style: inherit;">10</span>, label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Lattice Points'</span>)</span>
+<span id="cb1-40"></span>
+<span id="cb1-41"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Plot all parallelograms in the lattice</span></span>
+<span id="cb1-42"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> point <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> lattice_points:</span>
+<span id="cb1-43">    parallelogram <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.array([</span>
+<span id="cb1-44">        point,</span>
+<span id="cb1-45">        point <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> basis[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>],</span>
+<span id="cb1-46">        point <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> basis[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> basis[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>],</span>
+<span id="cb1-47">        point <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> basis[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>],</span>
+<span id="cb1-48">        point</span>
+<span id="cb1-49">    ])</span>
+<span id="cb1-50">    plt.plot(parallelogram[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>], parallelogram[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>], color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'orange'</span>, linestyle<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'dotted'</span>, linewidth<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.8</span>)</span>
+<span id="cb1-51"></span>
+<span id="cb1-52"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Highlight the fundamental domain (parallelogram at the origin) with a hashed pattern</span></span>
+<span id="cb1-53">fundamental_parallelogram <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.array([</span>
+<span id="cb1-54">    [<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>],</span>
+<span id="cb1-55">    basis[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>],</span>
+<span id="cb1-56">    basis[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> basis[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>],</span>
+<span id="cb1-57">    basis[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>],</span>
+<span id="cb1-58">    [<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]</span>
+<span id="cb1-59">])</span>
+<span id="cb1-60">polygon <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> Polygon(fundamental_parallelogram, closed<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>, facecolor<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'none'</span>, edgecolor<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'orange'</span>, hatch<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'//'</span>, linewidth<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">9</span>)</span></code></pre></div>
-<div class="cell-output cell-output-display">
-<p><img src="https://miiip.github.io/posts/is-it-hacked_files/figure-html/cell-11-output-1.png" class="img-fluid"></p>
-</div>
-</div>
-<p>Now we are ready to train the model. Here is the trick: we use something called transfer learning. We borrow the knowledge from a very big pre-trained model like <code>resnet18</code> and customize that knowledge for our use case. It’s like getting knowledge about mathematics in general and then getting specialized in derivatives</p>
-<div class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2023-04-15T12:01:48.230111Z&quot;,&quot;iopub.status.busy&quot;:&quot;2023-04-15T12:01:48.229826Z&quot;,&quot;iopub.status.idle&quot;:&quot;2023-04-15T12:02:02.945903Z&quot;,&quot;shell.execute_reply&quot;:&quot;2023-04-15T12:02:02.944976Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2023-04-15T12:01:48.230062Z&quot;}" data-trusted="true" data-execution_count="21">
-<div class="sourceCode cell-code" id="cb17" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1">learn <span class="op" style="color: #5E5E5E;
+font-style: inherit;">2</span>)</span>
+<span id="cb1-61">plt.gca().add_patch(polygon)</span>
+<span id="cb1-62"></span>
+<span id="cb1-63"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span> vision_learner(dls, resnet18, metrics<span class="op" style="color: #5E5E5E;
+font-style: inherit;"># Plot the lattice point (green dot)</span></span>
+<span id="cb1-64">plt.scatter(lattice_point[<span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">=</span>error_rate)</span>
-<span id="cb17-2">learn.fine_tune(<span class="dv" style="color: #AD0000;
+font-style: inherit;">0</span>], lattice_point[<span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">8</span>)</span></code></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Downloading: "https://download.pytorch.org/models/resnet18-f37072fd.pth" to /root/.cache/torch/hub/checkpoints/resnet18-f37072fd.pth</code></pre>
-</div>
-<div class="cell-output cell-output-display">
-<script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"487aa3bcd5874a86a06fc00140183a88","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
-</script>
-</div>
-<div class="cell-output cell-output-display">
-
-<style>
-    /* Turns off some styling */
-    progress {
-        /* gets rid of default border in Firefox and Opera. */
-        border: none;
-        /* Needs to be in here for Safari polyfill so background images work as expected. */
-        background-size: auto;
-    }
-    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
-        background: #F44336;
-    }
-</style>
-</div>
-<div class="cell-output cell-output-display">
-<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th">epoch</th>
-<th data-quarto-table-cell-role="th">train_loss</th>
-<th data-quarto-table-cell-role="th">valid_loss</th>
-<th data-quarto-table-cell-role="th">error_rate</th>
-<th data-quarto-table-cell-role="th">time</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>0</td>
-<td>1.430695</td>
-<td>0.622086</td>
-<td>0.315789</td>
-<td>00:07</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="cell-output cell-output-display">
-
-<style>
-    /* Turns off some styling */
-    progress {
-        /* gets rid of default border in Firefox and Opera. */
-        border: none;
-        /* Needs to be in here for Safari polyfill so background images work as expected. */
-        background-size: auto;
-    }
-    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
-        background: #F44336;
-    }
-</style>
-</div>
-<div class="cell-output cell-output-display">
-<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th">epoch</th>
-<th data-quarto-table-cell-role="th">train_loss</th>
-<th data-quarto-table-cell-role="th">valid_loss</th>
-<th data-quarto-table-cell-role="th">error_rate</th>
-<th data-quarto-table-cell-role="th">time</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>0</td>
-<td>0.767509</td>
-<td>0.755880</td>
-<td>0.368421</td>
-<td>00:01</td>
-</tr>
-<tr class="even">
-<td>1</td>
-<td>0.668098</td>
-<td>0.829260</td>
-<td>0.368421</td>
-<td>00:00</td>
-</tr>
-<tr class="odd">
-<td>2</td>
-<td>0.580183</td>
-<td>0.730606</td>
-<td>0.315789</td>
-<td>00:00</td>
-</tr>
-<tr class="even">
-<td>3</td>
-<td>0.442123</td>
-<td>0.641195</td>
-<td>0.263158</td>
-<td>00:00</td>
-</tr>
-<tr class="odd">
-<td>4</td>
-<td>0.366080</td>
-<td>0.600636</td>
-<td>0.263158</td>
-<td>00:00</td>
-</tr>
-<tr class="even">
-<td>5</td>
-<td>0.301277</td>
-<td>0.524480</td>
-<td>0.210526</td>
-<td>00:00</td>
-</tr>
-<tr class="odd">
-<td>6</td>
-<td>0.254276</td>
-<td>0.463378</td>
-<td>0.105263</td>
-<td>00:00</td>
-</tr>
-<tr class="even">
-<td>7</td>
-<td>0.218404</td>
-<td>0.426965</td>
-<td>0.105263</td>
-<td>00:00</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<p>We get almost 90% accuracy on the validation dataset which is great for a first try 🥳</p>
-<p>Here is the confusion matrix for the validation dataset. The confusion matrix tells us the following:</p>
-<ol type="1">
-<li><p>How many defaced websites were labeled as defaced (True Positives)</p></li>
-<li><p>How many defaced websites were labeled as non-defaced (False negatives)</p></li>
-<li><p>How many non-defaced websites were labeled as defaced (False positives)</p></li>
-<li><p>How many non-defaced websites were labeled as non-defaced (True Negatives)</p></li>
-</ol>
-<div class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2023-04-15T12:02:16.504701Z&quot;,&quot;iopub.status.busy&quot;:&quot;2023-04-15T12:02:16.504411Z&quot;,&quot;iopub.status.idle&quot;:&quot;2023-04-15T12:02:17.236760Z&quot;,&quot;shell.execute_reply&quot;:&quot;2023-04-15T12:02:17.235697Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2023-04-15T12:02:16.504668Z&quot;}" data-trusted="true" data-execution_count="22">
-<div class="sourceCode cell-code" id="cb19" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1">interp <span class="op" style="color: #5E5E5E;
+font-style: inherit;">1</span>], color<span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span> ClassificationInterpretation.from_learner(learn)</span>
-<span id="cb19-2">interp.plot_confusion_matrix()</span></code></pre></div>
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'green'</span>, s<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">20</span>, label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Chosen lattice point (step 1)'</span>)</span>
+<span id="cb1-65"></span>
+<span id="cb1-66"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Plot the noise vector (larger arrow)</span></span>
+<span id="cb1-67">plt.quiver(</span>
+<span id="cb1-68">    lattice_point[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>], lattice_point[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>], noise[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>], noise[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>],</span>
+<span id="cb1-69">    angles<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'xy'</span>, scale_units<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'xy'</span>, scale<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'red'</span>, width<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.005</span>, label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Noise Vector (step 2)'</span></span>
+<span id="cb1-70">)</span>
+<span id="cb1-71"></span>
+<span id="cb1-72"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Plot the noisy point</span></span>
+<span id="cb1-73">plt.scatter(noisy_point[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>], noisy_point[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>], color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'blue'</span>, s<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">20</span>, label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Noisy Point'</span>)</span>
+<span id="cb1-74"></span>
+<span id="cb1-75"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Plot the reduced point</span></span>
+<span id="cb1-76">plt.scatter(reduced_point[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>], reduced_point[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>], color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'purple'</span>, s<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">20</span>, marker<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'x'</span>, label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Reduced Point (step 3)'</span>)</span>
+<span id="cb1-77"></span>
+<span id="cb1-78"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Mark the basis vectors</span></span>
+<span id="cb1-79">plt.quiver(</span>
+<span id="cb1-80">    <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, basis[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>], basis[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>],</span>
+<span id="cb1-81">    angles<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'xy'</span>, scale_units<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'xy'</span>, scale<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'magenta'</span>, width<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.005</span>, label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Basis Vector 1'</span></span>
+<span id="cb1-82">)</span>
+<span id="cb1-83">plt.quiver(</span>
+<span id="cb1-84">    <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, basis[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>], basis[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>],</span>
+<span id="cb1-85">    angles<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'xy'</span>, scale_units<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'xy'</span>, scale<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'cyan'</span>, width<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.005</span>, label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Basis Vector 2'</span></span>
+<span id="cb1-86">)</span>
+<span id="cb1-87"></span>
+<span id="cb1-88"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Add labels and legend</span></span>
+<span id="cb1-89">plt.axhline(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'gray'</span>, linewidth<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.5</span>)</span>
+<span id="cb1-90">plt.axvline(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'gray'</span>, linewidth<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.5</span>)</span>
+<span id="cb1-91">plt.grid(color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'lightgray'</span>, linestyle<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'--'</span>, linewidth<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.5</span>)</span>
+<span id="cb1-92">plt.legend()</span>
+<span id="cb1-93">plt.title(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Lattice Visualization with Hashed Fundamental Domain'</span>)</span>
+<span id="cb1-94">plt.xlabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'x'</span>)</span>
+<span id="cb1-95">plt.ylabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'y'</span>)</span>
+<span id="cb1-96">plt.axis(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'equal'</span>)</span>
+<span id="cb1-97"></span>
+<span id="cb1-98"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Zoom in on a smaller region of the lattice</span></span>
+<span id="cb1-99">plt.axis(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'auto'</span>)</span>
+<span id="cb1-100">plt.xlim(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">20</span>)</span>
+<span id="cb1-101">plt.ylim(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">20</span>)</span>
+<span id="cb1-102"></span>
+<span id="cb1-103">plt.show()</span></code></pre></div>
+</details>
 <div class="cell-output cell-output-display">
-
-<style>
-    /* Turns off some styling */
-    progress {
-        /* gets rid of default border in Firefox and Opera. */
-        border: none;
-        /* Needs to be in here for Safari polyfill so background images work as expected. */
-        background-size: auto;
-    }
-    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
-        background: #F44336;
-    }
-</style>
+<div>
+<figure class="figure">
+<p><img src="https://miiip.github.io/posts/Gaussian_files/figure-html/cell-2-output-1.png" class="img-fluid figure-img"></p>
+</figure>
 </div>
-<div class="cell-output cell-output-display">
-
-</div>
-<div class="cell-output cell-output-display">
-
-<style>
-    /* Turns off some styling */
-    progress {
-        /* gets rid of default border in Firefox and Opera. */
-        border: none;
-        /* Needs to be in here for Safari polyfill so background images work as expected. */
-        background-size: auto;
-    }
-    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
-        background: #F44336;
-    }
-</style>
-</div>
-<div class="cell-output cell-output-display">
-
-</div>
-<div class="cell-output cell-output-display">
-<p><img src="https://miiip.github.io/posts/is-it-hacked_files/figure-html/cell-13-output-5.png" class="img-fluid"></p>
 </div>
 </div>
 </section>
-<section id="step-3-use-the-model" class="level2">
-<h2 class="anchored" data-anchor-id="step-3-use-the-model">Step 3: Use the model</h2>
-<p>Let’s see what our model thinks about that defaced.jpg we downloaded at the start:</p>
-<div class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2023-04-15T12:02:35.339790Z&quot;,&quot;iopub.status.busy&quot;:&quot;2023-04-15T12:02:35.338975Z&quot;,&quot;iopub.status.idle&quot;:&quot;2023-04-15T12:02:35.393481Z&quot;,&quot;shell.execute_reply&quot;:&quot;2023-04-15T12:02:35.392621Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2023-04-15T12:02:35.339750Z&quot;}" data-trusted="true" data-execution_count="23">
-<div class="sourceCode cell-code" id="cb20" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1">is_defaced,_,probs <span class="op" style="color: #5E5E5E;
+<section id="the-problem" class="level1">
+<h1>The problem</h1>
+<p>Now, let’s introduce some constraints:</p>
+<ol type="1">
+<li>We want the expected norm of the error vector to be a specific value, denoted as <img src="https://latex.codecogs.com/png.latex?s">.<br>
+</li>
+<li>As with most things in cryptography, we want the result of the reduction to appear as if it were sampled from a uniform distribution.</li>
+</ol>
+<p>Why do we need these properties? Well, that’s a story for another article! 😊</p>
+<p>At first glance, one might think: “If we want vectors that look uniformly distributed, why not just sample each coordinate from a uniform distribution?” While this approach works perfectly for the second property, it fails to satisfy the first. Sampling each coordinate uniformly results in vectors with norms that deviate significantly from the desired value <img src="https://latex.codecogs.com/png.latex?s">.</p>
+<p>To focus on the first property, one solution is to sample each coordinate from a Gaussian distribution with a standard deviation of <img src="https://latex.codecogs.com/png.latex?s%20/%20%5Csqrt%7Bn%7D">, where <img src="https://latex.codecogs.com/png.latex?n"> is the number of coordinates. This ensures the expected norm of the vector is <img src="https://latex.codecogs.com/png.latex?s">. But what about the “uniform-like” appearance?</p>
+<p>Let’s build some intuition. A lattice has a clear periodic structure. Looking at the earlier example, we see the fundamental domain (a single cell) repeating endlessly to cover the entire space. This means any point in space can be expressed as the sum of a point in the fundamental domain and a lattice point.</p>
+<p>From another perspective, if we repeatedly translate the fundamental domain by lattice points, we cover the entire space. Thus, every point can be uniquely written as the sum of a lattice point and a point within the fundamental domain. This is illustrated in the figure below and can be expressed formally as:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20w%20=%20t%20+%20v,%20%5Ctext%7B%20for%20a%20unique%20%7D%20t%20%5Cin%20%5Cmathcal%7BP%7D(B)%20%5Ctext%7B%20and%20a%20unique%20%7D%20v%20%5Cin%20L.%20"></p>
+<p>This decomposition is key to understanding how we achieve both properties simultaneously.</p>
+<div id="7dab36dc" class="cell" data-execution_count="3">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"></span>
+<span id="cb2-2"><span class="im" style="color: #00769E;
 background-color: null;
-font-style: inherit;">=</span> learn.predict(PILImage.create(<span class="st" style="color: #20794D;
+font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
 background-color: null;
-font-style: inherit;">'defaced.jpg'</span>))</span>
-<span id="cb20-2"><span class="bu" style="color: null;
+font-style: inherit;">as</span> np</span>
+<span id="cb2-3"><span class="im" style="color: #00769E;
 background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
 background-color: null;
-font-style: inherit;">f"This is a: </span><span class="sc" style="color: #5E5E5E;
+font-style: inherit;">as</span> plt</span>
+<span id="cb2-4"><span class="im" style="color: #00769E;
 background-color: null;
-font-style: inherit;">{</span>is_defaced<span class="sc" style="color: #5E5E5E;
+font-style: inherit;">from</span> matplotlib.patches <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> Polygon</span>
+<span id="cb2-5"></span>
+<span id="cb2-6"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Function to generate lattice points</span></span>
+<span id="cb2-7"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> generate_lattice(basis, x_range, y_range):</span>
+<span id="cb2-8">    points <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> []</span>
+<span id="cb2-9">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(x_range[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>], x_range[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>]):</span>
+<span id="cb2-10">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> j <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(y_range[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>], y_range[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>]):</span>
+<span id="cb2-11">            point <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> i <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> basis[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> j <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> basis[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>]</span>
+<span id="cb2-12">            points.append(point)</span>
+<span id="cb2-13">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> np.array(points)</span>
+<span id="cb2-14"></span>
+<span id="cb2-15"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Function to reduce a point modulo the fundamental domain</span></span>
+<span id="cb2-16"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> reduce_mod_basis(point, basis):</span>
+<span id="cb2-17">    inv_basis <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.linalg.inv(basis)</span>
+<span id="cb2-18">    coeffs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.dot(inv_basis, point)</span>
+<span id="cb2-19">    lattice_point <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.dot(basis, np.floor(coeffs))  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Lattice point</span></span>
+<span id="cb2-20">    fundamental_point <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> point <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> lattice_point       <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Point in the fundamental domain</span></span>
+<span id="cb2-21">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> fundamental_point, lattice_point</span>
+<span id="cb2-22"></span>
+<span id="cb2-23"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Define the lattice basis (2D)</span></span>
+<span id="cb2-24">basis <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.array([[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">6</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>], [<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>]])</span>
+<span id="cb2-25"></span>
+<span id="cb2-26"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Generate lattice points</span></span>
+<span id="cb2-27">lattice_points <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> generate_lattice(basis, x_range<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>), y_range<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>))</span>
+<span id="cb2-28"></span>
+<span id="cb2-29"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Define a point closer to the origin</span></span>
+<span id="cb2-30">outside_point <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.array([<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">8</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">7</span>])  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Example point closer to the origin</span></span>
+<span id="cb2-31"></span>
+<span id="cb2-32"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Decompose the point into a fundamental domain point and a lattice point</span></span>
+<span id="cb2-33">fundamental_point, lattice_point <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> reduce_mod_basis(outside_point, basis)</span>
+<span id="cb2-34"></span>
+<span id="cb2-35"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Plot the lattice</span></span>
+<span id="cb2-36">plt.figure(figsize<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>))</span>
+<span id="cb2-37">plt.scatter(lattice_points[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>], lattice_points[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>], color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'black'</span>, s<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Lattice Points'</span>)</span>
+<span id="cb2-38"></span>
+<span id="cb2-39"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Highlight the fundamental domain (parallelogram at the origin)</span></span>
+<span id="cb2-40">fundamental_parallelogram <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.array([</span>
+<span id="cb2-41">    [<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>],</span>
+<span id="cb2-42">    basis[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>],</span>
+<span id="cb2-43">    basis[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> basis[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>],</span>
+<span id="cb2-44">    basis[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>],</span>
+<span id="cb2-45">    [<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]</span>
+<span id="cb2-46">])</span>
+<span id="cb2-47">polygon <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> Polygon(fundamental_parallelogram, closed<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>, facecolor<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'none'</span>, edgecolor<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'orange'</span>, hatch<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'//'</span>, linewidth<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>)</span>
+<span id="cb2-48">plt.gca().add_patch(polygon)</span>
+<span id="cb2-49"></span>
+<span id="cb2-50"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Plot the point outside the fundamental domain</span></span>
+<span id="cb2-51">plt.scatter(outside_point[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>], outside_point[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>], color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'blue'</span>, s<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span>, label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Point Outside Fundamental Domain'</span>)</span>
+<span id="cb2-52"></span>
+<span id="cb2-53"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Plot the fundamental domain point</span></span>
+<span id="cb2-54">plt.scatter(fundamental_point[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>], fundamental_point[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>], color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'purple'</span>, s<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span>, label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Point in Fundamental Domain'</span>)</span>
+<span id="cb2-55"></span>
+<span id="cb2-56"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Plot the lattice point</span></span>
+<span id="cb2-57">plt.scatter(lattice_point[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>], lattice_point[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>], color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'red'</span>, s<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span>, label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Lattice Point'</span>)</span>
+<span id="cb2-58"></span>
+<span id="cb2-59"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Draw vector from origin to the outside point</span></span>
+<span id="cb2-60">plt.quiver(</span>
+<span id="cb2-61">    <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>,</span>
+<span id="cb2-62">    outside_point[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>], outside_point[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>],</span>
+<span id="cb2-63">    angles<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'xy'</span>, scale_units<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'xy'</span>, scale<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'blue'</span>, width<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.005</span>, label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Vector: Origin to Point'</span></span>
+<span id="cb2-64">)</span>
+<span id="cb2-65"></span>
+<span id="cb2-66"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Draw vector from origin to the fundamental domain point</span></span>
+<span id="cb2-67">plt.quiver(</span>
+<span id="cb2-68">    <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>,</span>
+<span id="cb2-69">    fundamental_point[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>], fundamental_point[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>],</span>
+<span id="cb2-70">    angles<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'xy'</span>, scale_units<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'xy'</span>, scale<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'purple'</span>, width<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.005</span>, label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Vector: Origin to Reduction (Fundamental Domain)'</span></span>
+<span id="cb2-71">)</span>
+<span id="cb2-72"></span>
+<span id="cb2-73"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Draw vector from origin to the lattice point</span></span>
+<span id="cb2-74">plt.quiver(</span>
+<span id="cb2-75">    <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>,</span>
+<span id="cb2-76">    lattice_point[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>], lattice_point[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>],</span>
+<span id="cb2-77">    angles<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'xy'</span>, scale_units<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'xy'</span>, scale<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'red'</span>, width<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.005</span>, label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Vector: Origin to Lattice Point'</span></span>
+<span id="cb2-78">)</span>
+<span id="cb2-79"></span>
+<span id="cb2-80"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Add support lines to form the parallelogram</span></span>
+<span id="cb2-81"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Line from lattice point to the outside point</span></span>
+<span id="cb2-82">plt.plot(</span>
+<span id="cb2-83">    [lattice_point[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>], outside_point[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]],</span>
+<span id="cb2-84">    [lattice_point[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>], outside_point[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>]],</span>
+<span id="cb2-85">    color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'gray'</span>, linestyle<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'--'</span>, linewidth<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Support Line'</span></span>
+<span id="cb2-86">)</span>
+<span id="cb2-87"></span>
+<span id="cb2-88"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Line from fundamental point to the outside point</span></span>
+<span id="cb2-89">plt.plot(</span>
+<span id="cb2-90">    [fundamental_point[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>], outside_point[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]],</span>
+<span id="cb2-91">    [fundamental_point[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>], outside_point[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>]],</span>
+<span id="cb2-92">    color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'gray'</span>, linestyle<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'--'</span>, linewidth<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span></span>
+<span id="cb2-93">)</span>
+<span id="cb2-94"></span>
+<span id="cb2-95"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Add labels and legend</span></span>
+<span id="cb2-96">plt.axhline(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'gray'</span>, linewidth<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.5</span>)</span>
+<span id="cb2-97">plt.axvline(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'gray'</span>, linewidth<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.5</span>)</span>
+<span id="cb2-98">plt.grid(color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'lightgray'</span>, linestyle<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'--'</span>, linewidth<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.5</span>)</span>
+<span id="cb2-99">plt.legend()</span>
+<span id="cb2-100">plt.title(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Decomposition of a Point with Parallelogram Support Lines'</span>)</span>
+<span id="cb2-101">plt.xlabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'x'</span>)</span>
+<span id="cb2-102">plt.ylabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'y'</span>)</span>
+<span id="cb2-103">plt.axis(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'equal'</span>)</span>
+<span id="cb2-104"></span>
+<span id="cb2-105"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Adjust zoom level for better visualization</span></span>
+<span id="cb2-106">plt.axis(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'auto'</span>)</span>
+<span id="cb2-107">plt.xlim(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">15</span>)</span>
+<span id="cb2-108">plt.ylim(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">15</span>)</span>
+<span id="cb2-109"></span>
+<span id="cb2-110">plt.show()</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://miiip.github.io/posts/Gaussian_files/figure-html/cell-3-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="gaussian-reduction" class="level1">
+<h1>Gaussian reduction</h1>
+<p>This equivalence relation naturally emerges: two points are considered equivalent if they map to the same point in the fundamental domain. In other words, two points are equivalent if they differ by a lattice vector.</p>
+<p>Now, let’s revisit the Gaussian distribution, denoted by <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BG%7D_s">, which describes the probability distribution of vectors with an expected norm <img src="https://latex.codecogs.com/png.latex?s">. For each point <img src="https://latex.codecogs.com/png.latex?x%20%5Cin%20%5Cmathbb%7BR%7D%5En">, <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BG%7D_s"> assigns a probability density value <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BG%7D_s(x)">.</p>
+<p>This leads to an intriguing question:</p>
+<p><strong>How does the Gaussian distribution behave under the equivalence relation?</strong><br>
+<strong>What is the density value assigned to a point in the fundamental domain?</strong></p>
+<p>Recall that for every point <img src="https://latex.codecogs.com/png.latex?t%20%5Cin%20%5Cmathcal%7BP%7D(B)"> (the fundamental domain), there are infinitely many equivalent points in <img src="https://latex.codecogs.com/png.latex?%5Cmathbb%7BR%7D%5En"> that differ by lattice vectors. For instance, <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BG%7D_s"> assigns a density value to <img src="https://latex.codecogs.com/png.latex?t"> and another density value to each equivalent point <img src="https://latex.codecogs.com/png.latex?w%20=%20t%20+%20v">, where <img src="https://latex.codecogs.com/png.latex?v"> is any lattice vector. However, under the equivalence relation, all these points <img src="https://latex.codecogs.com/png.latex?w"> are treated as “the same” as <img src="https://latex.codecogs.com/png.latex?t">. So, how do we assign a single density value to <img src="https://latex.codecogs.com/png.latex?t">?</p>
+<p>A natural solution is to define a new probability distribution, <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BD%7D_s">, restricted to the fundamental domain. The density value assigned by <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BD%7D_s"> to a point <img src="https://latex.codecogs.com/png.latex?t%20%5Cin%20%5Cmathcal%7BP%7D(B)"> is the sum of all density values assigned by <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BG%7D_s"> to its equivalent points <img src="https://latex.codecogs.com/png.latex?w%20=%20t%20+%20v">, for all <img src="https://latex.codecogs.com/png.latex?v%20%5Cin%20L">. Formally, this is written as:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20%5Cmathcal%7BD%7D_s(x)%20=%20%5Csum_%7Bz%20%5Cin%20L%7D%20%5Cmathcal%7BG%7D_s(x%20+%20z)%20"></p>
+<p>This construction ensures that <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BD%7D_s"> respects the equivalence relation and is properly defined over the fundamental domain.</p>
+<p>Let’s take another look at our goal. We want to sample an error vector from a Gaussian distribution with an expected norm of <img src="https://latex.codecogs.com/png.latex?s">. However, after reducing this error to the fundamental domain, it should appear as though it was sampled from a uniform distribution. In other words, while the error is initially drawn from <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BG%7D_s">, we want the resulting distribution <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BD%7D_s"> to be indistinguishable from a uniform distribution.</p>
+<p>To build intuition, let’s consider a simple lattice, <img src="https://latex.codecogs.com/png.latex?%5Cmathbb%7BZ%7D">, with the fundamental domain <img src="https://latex.codecogs.com/png.latex?%5B0,%201)">. We’ll explore how <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BD%7D_s"> behaves for different values of <img src="https://latex.codecogs.com/png.latex?s">. For small values of <img src="https://latex.codecogs.com/png.latex?s"> (e.g., <img src="https://latex.codecogs.com/png.latex?0.1">, <img src="https://latex.codecogs.com/png.latex?0.2">), <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BD%7D_s"> is far from uniform—it has noticeable peaks and valleys, unlike the flat line of a uniform distribution. But as <img src="https://latex.codecogs.com/png.latex?s"> increases, something fascinating happens: <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BD%7D_s"> starts to flatten out, gradually resembling a uniform distribution. For sufficiently large <img src="https://latex.codecogs.com/png.latex?s">, <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BD%7D_s"> becomes nearly indistinguishable from uniform.</p>
+<p>This behavior is key to achieving both properties: maintaining the expected norm of <img src="https://latex.codecogs.com/png.latex?s"> while ensuring the reduced error appears uniform.</p>
+<div id="77b41147" class="cell" data-execution_count="25">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> np</span>
+<span id="cb3-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> plt</span>
+<span id="cb3-3"></span>
+<span id="cb3-4"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Gaussian function G_s</span></span>
+<span id="cb3-5"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> G_s(x, s):</span>
+<span id="cb3-6">    scale <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.sqrt(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> np.pi) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> s</span>
+<span id="cb3-7">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> scale) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> np.exp(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span>np.pi <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> (x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> scale) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>)</span>
+<span id="cb3-8"></span>
+<span id="cb3-9"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Periodic sum D_s over the integer lattice</span></span>
+<span id="cb3-10"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> D_s(x, s, num_terms<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span>):</span>
+<span id="cb3-11">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>(G_s(x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> z, s) <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> z <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span>num_terms, num_terms <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>))</span>
+<span id="cb3-12"></span>
+<span id="cb3-13"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Static plot for multiple values of s</span></span>
+<span id="cb3-14"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> plot_static_Gs_Ds(s_values):</span>
+<span id="cb3-15">    fig, axs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> plt.subplots(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(s_values), <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, figsize<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">12</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(s_values)))</span>
+<span id="cb3-16"></span>
+<span id="cb3-17">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> i, s <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">enumerate</span>(s_values):</span>
+<span id="cb3-18">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Plot G_s over the real line</span></span>
+<span id="cb3-19">        x1 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.linspace(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1000</span>)</span>
+<span id="cb3-20">        axs[i, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>].plot(x1, G_s(x1, s), label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f'$G_s$, s=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>s<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'</span>)</span>
+<span id="cb3-21">        axs[i, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>].set_title(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"$G_s(x)$ for s=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>s<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb3-22">        axs[i, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>].set_ylabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"$G_s(x)$"</span>)</span>
+<span id="cb3-23">        axs[i, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>].legend()</span>
+<span id="cb3-24">        axs[i, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>].grid(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>)</span>
+<span id="cb3-25"></span>
+<span id="cb3-26">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Plot D_s over extended domain to show multiple periods</span></span>
+<span id="cb3-27">        x2 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.linspace(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1500</span>)</span>
+<span id="cb3-28">        y2 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [D_s(val, s) <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> val <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> x2]</span>
+<span id="cb3-29">        axs[i, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>].plot(x2, y2, label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f'$D_s$, s=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>s<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'</span>)</span>
+<span id="cb3-30">        axs[i, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>].set_title(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"$D_s(x)$ for s=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>s<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb3-31">        axs[i, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>].set_xlabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"x"</span>)</span>
+<span id="cb3-32">        axs[i, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>].set_ylabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"$D_s(x)$"</span>)</span>
+<span id="cb3-33">        axs[i, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>].legend()</span>
+<span id="cb3-34">        axs[i, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>].grid(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>)</span>
+<span id="cb3-35"></span>
+<span id="cb3-36">    plt.tight_layout()</span>
+<span id="cb3-37">    plt.show()</span>
+<span id="cb3-38"></span>
+<span id="cb3-39"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Values of s to plot</span></span>
+<span id="cb3-40">s_values <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.2</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.7</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.27</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.5</span>]</span>
+<span id="cb3-41">plot_static_Gs_Ds(s_values)</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://miiip.github.io/posts/Gaussian_files/figure-html/cell-4-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>To summarize the big picture: our goal is to sample error vectors from a Gaussian distribution to achieve an expected norm of <img src="https://latex.codecogs.com/png.latex?s">, while ensuring that the error appears uniformly distributed when reduced modulo the fundamental domain. The intuitive way to meet both requirements is to make the Gaussian distribution sufficiently wide.</p>
+<p>This makes sense intuitively: a Gaussian distribution is defined by its characteristic “hump.” When the distribution is wide enough and mapped into a small cell (the fundamental domain), the “hump” effect diminishes, producing a distribution that closely resembles uniformity.</p>
+<p>Now, we still have one crucial question to address: how “wide” does the Gaussian distribution need to be for <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BD%7D_s"> to appear uniform? To answer this, we need a way to measure how “uniform” <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BD%7D_s"> actually is. Here’s a hint: let’s visualize <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BD%7D_s"> by plotting it over the entire space. This will give us valuable insights into its behavior and help us determine the required “width.”</p>
+<div id="cd0fe5f8" class="cell" data-execution_count="27">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> np</span>
+<span id="cb4-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> plt</span>
+<span id="cb4-3"></span>
+<span id="cb4-4"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Gaussian function G_s</span></span>
+<span id="cb4-5"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> G_s(x, s):</span>
+<span id="cb4-6">    scale <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.sqrt(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> np.pi) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> s</span>
+<span id="cb4-7">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> scale) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> np.exp(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span>np.pi <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> (x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> scale) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>)</span>
+<span id="cb4-8"></span>
+<span id="cb4-9"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Periodic sum D_s over the integer lattice</span></span>
+<span id="cb4-10"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> D_s(x, s, num_terms<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span>):</span>
+<span id="cb4-11">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>(G_s(x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> z, s) <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> z <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span>num_terms, num_terms <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>))</span>
+<span id="cb4-12"></span>
+<span id="cb4-13"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Static plot for multiple values of s</span></span>
+<span id="cb4-14"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> plot_static_Gs_Ds(s_values):</span>
+<span id="cb4-15">    fig, axs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> plt.subplots(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(s_values), <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, figsize<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">12</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(s_values)))</span>
+<span id="cb4-16"></span>
+<span id="cb4-17">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> i, s <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">enumerate</span>(s_values):</span>
+<span id="cb4-18">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Plot G_s over the real line</span></span>
+<span id="cb4-19">        x1 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.linspace(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1000</span>)</span>
+<span id="cb4-20">        axs[i, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>].plot(x1, G_s(x1, s), label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f'$G_s$, s=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>s<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'</span>)</span>
+<span id="cb4-21">        axs[i, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>].set_title(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"$G_s(x)$ for s=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>s<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb4-22">        axs[i, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>].set_ylabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"$G_s(x)$"</span>)</span>
+<span id="cb4-23">        axs[i, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>].legend()</span>
+<span id="cb4-24">        axs[i, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>].grid(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>)</span>
+<span id="cb4-25"></span>
+<span id="cb4-26">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Plot D_s over extended domain to show multiple periods</span></span>
+<span id="cb4-27">        x2 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.linspace(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1500</span>)</span>
+<span id="cb4-28">        y2 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [D_s(val, s) <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> val <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> x2]</span>
+<span id="cb4-29">        axs[i, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>].plot(x2, y2, label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f'$D_s$, s=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>s<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'</span>)</span>
+<span id="cb4-30">        axs[i, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>].set_title(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"$D_s(x)$ for s=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>s<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb4-31">        axs[i, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>].set_xlabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"x"</span>)</span>
+<span id="cb4-32">        axs[i, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>].set_ylabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"$D_s(x)$"</span>)</span>
+<span id="cb4-33">        axs[i, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>].legend()</span>
+<span id="cb4-34">        axs[i, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>].grid(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>)</span>
+<span id="cb4-35"></span>
+<span id="cb4-36">    plt.tight_layout()</span>
+<span id="cb4-37">    plt.show()</span>
+<span id="cb4-38"></span>
+<span id="cb4-39"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Values of s to plot</span></span>
+<span id="cb4-40">s_values <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.2</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.7</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.27</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.5</span>]</span>
+<span id="cb4-41">plot_static_Gs_Ds(s_values)</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://miiip.github.io/posts/Gaussian_files/figure-html/cell-5-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="fourier" class="level1">
+<h1>Fourier</h1>
+<p>It looks a lot like a periodic function, doesn’t it? This observation doesn’t change what we’ve noted about <img src="https://latex.codecogs.com/png.latex?s">: as <img src="https://latex.codecogs.com/png.latex?s"> increases, <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BD%7D_s"> becomes increasingly uniform.</p>
+<p>This periodicity naturally leads us to think about Fourier analysis.</p>
+<p>Consider a “nice” periodic function <img src="https://latex.codecogs.com/png.latex?f:%20%5Cmathcal%7BP%7D(B)%20%5Crightarrow%20%5Cmathbb%7BR%7D">. Why <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BP%7D(B)"> and not <img src="https://latex.codecogs.com/png.latex?%5Cmathbb%7BR%7D%5En">? Well, since the function is periodic over the lattice, it’s sufficient to define it over a single lattice cell (the fundamental domain). Fourier transform allows us to express <img src="https://latex.codecogs.com/png.latex?f"> as a sum of periodic basis functions of the form <img src="https://latex.codecogs.com/png.latex?x%20%5Cmapsto%20e%5E%7B2%5Cpi%20i%20%5Clangle%20x,%20y%20%5Crangle%7D">.</p>
+<p>Let’s visualize some of these basis functions—or at least the real part of them—to build intuition!</p>
+<div id="f207db31" class="cell" data-execution_count="8">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> np</span>
+<span id="cb5-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> plt</span>
+<span id="cb5-3"></span>
+<span id="cb5-4"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Define parameters</span></span>
+<span id="cb5-5">x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.linspace(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1000</span>)  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># x values from 0 to 1</span></span>
+<span id="cb5-6">y_values <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>]  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Different y values</span></span>
+<span id="cb5-7"></span>
+<span id="cb5-8"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Plot basis functions</span></span>
+<span id="cb5-9">plt.figure(figsize<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">6</span>))</span>
+<span id="cb5-10"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> y <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> y_values:</span>
+<span id="cb5-11">    basis_function <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.exp(<span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">2j</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> np.pi <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> y <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> x)  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Complex exponential</span></span>
+<span id="cb5-12">    plt.plot(x, np.real(basis_function), label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f'y = </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>y<span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">}</span><span class="ss" style="color: #20794D;
 background-color: null;
-font-style: inherit;">."</span>)</span>
-<span id="cb20-3"><span class="bu" style="color: null;
+font-style: inherit;">'</span>)  <span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+font-style: inherit;"># Plot real part</span></span>
+<span id="cb5-13"></span>
+<span id="cb5-14"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">f"Probability it's a defaced: </span><span class="sc" style="color: #5E5E5E;
+font-style: inherit;"># Customize the plot</span></span>
+<span id="cb5-15">plt.title(<span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">{</span>probs[<span class="dv" style="color: #AD0000;
+font-style: inherit;">'Basis Functions for Frequencies (y)'</span>)</span>
+<span id="cb5-16">plt.xlabel(<span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">0</span>]<span class="sc" style="color: #5E5E5E;
+font-style: inherit;">'x'</span>)</span>
+<span id="cb5-17">plt.ylabel(<span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">:.4f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span>)</span></code></pre></div>
+font-style: inherit;">'Real Part of Basis Function'</span>)</span>
+<span id="cb5-18">plt.legend()</span>
+<span id="cb5-19">plt.grid()</span>
+<span id="cb5-20">plt.show()</span></code></pre></div>
+</details>
 <div class="cell-output cell-output-display">
-
-<style>
-    /* Turns off some styling */
-    progress {
-        /* gets rid of default border in Firefox and Opera. */
-        border: none;
-        /* Needs to be in here for Safari polyfill so background images work as expected. */
-        background-size: auto;
-    }
-    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
-        background: #F44336;
-    }
-</style>
-</div>
-<div class="cell-output cell-output-display">
-
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>This is a: d.
-Probability it's a defaced: 0.9962</code></pre>
+<div>
+<figure class="figure">
+<p><img src="https://miiip.github.io/posts/Gaussian_files/figure-html/cell-6-output-1.png" class="img-fluid figure-img"></p>
+</figure>
 </div>
 </div>
+</div>
+<p>We’ve plotted some basis functions for <img src="https://latex.codecogs.com/png.latex?y%20=%201">, <img src="https://latex.codecogs.com/png.latex?y%20=%202">, and <img src="https://latex.codecogs.com/png.latex?y%20=%204">, but why not try <img src="https://latex.codecogs.com/png.latex?y%20=%20%5Csqrt%7B2%7D"> or <img src="https://latex.codecogs.com/png.latex?y%20=%201.5">? What determines the allowed values for the frequencies? The answer lies in the periodicity of the basis functions:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20e%5E%7B2%5Cpi%20i%20%5Clangle%20x,%20y%20%5Crangle%7D%20=%20e%5E%7B2%5Cpi%20i%20%5Clangle%20x+v,%20y%20%5Crangle%7D,%20%5Cquad%20%5Ctext%7Bfor%20all%20%7D%20v%20%5Cin%20L.%20"></p>
+<p>Expanding this, we get:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20e%5E%7B2%5Cpi%20i%20%5Clangle%20x+v,%20y%20%5Crangle%7D%20=%20e%5E%7B2%5Cpi%20i%20%5Clangle%20x,%20y%20%5Crangle%7D%20e%5E%7B2%5Cpi%20i%20%5Clangle%20v,%20y%20%5Crangle%7D,%20"></p>
+<p>which implies:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20e%5E%7B2%5Cpi%20i%20%5Clangle%20v,%20y%20%5Crangle%7D%20=%201.%20"></p>
+<p>This condition holds when <img src="https://latex.codecogs.com/png.latex?2%5Cpi%20i%20%5Clangle%20v,%20y%20%5Crangle%20=%200">, or equivalently, when <img src="https://latex.codecogs.com/png.latex?%5Clangle%20v,%20y%20%5Crangle%20%5Cin%20%5Cmathbb%7BZ%7D"> for all <img src="https://latex.codecogs.com/png.latex?v%20%5Cin%20L">.</p>
+<p>In other words, the allowed frequencies are vectors <img src="https://latex.codecogs.com/png.latex?y%20%5Cin%20%5Cmathbb%7BR%7D%5En"> such that their dot product with every point in the lattice <img src="https://latex.codecogs.com/png.latex?L"> is an integer. Interestingly, these frequencies themselves form a lattice, called the <strong>dual lattice</strong>, denoted by <img src="https://latex.codecogs.com/png.latex?L%5E*">.</p>
+<p>Let’s return to our function <img src="https://latex.codecogs.com/png.latex?f">, which can be expressed as:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20f(x)%20=%20%5Csum_%7By%20%5Cin%20L%5E*%7D%20%5Chat%7Bf%7D(y)%20e%5E%7B2%5Cpi%20i%20%5Clangle%20x,%20y%20%5Crangle%7D,%20"></p>
+<p>where the Fourier coefficients <img src="https://latex.codecogs.com/png.latex?%5Chat%7Bf%7D(y)"> are given by:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20%5Chat%7Bf%7D(y)%20=%20%5Cfrac%7B1%7D%7B%5Cdet(L)%7D%20%5Cint_%7B%5Cmathcal%7BP%7D(B)%7D%20f(x)%20e%5E%7B-2%5Cpi%20i%20%5Clangle%20x,%20y%20%5Crangle%7D%20%5C,%20dx.%20"></p>
+<p>Here, <img src="https://latex.codecogs.com/png.latex?%5Chat%7Bf%7D(y)"> represents the “weight” of the basis function <img src="https://latex.codecogs.com/png.latex?e%5E%7B2%5Cpi%20i%20%5Clangle%20x,%20y%20%5Crangle%7D"> in the decomposition. While this may seem abstract, in our case, <img src="https://latex.codecogs.com/png.latex?f"> is simply the Gaussian distribution <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BD%7D_s(x)">, which represents the reduced Gaussian over the fundamental domain. For this specific function, the Fourier coefficients are straightforward to compute. Ignoring the constant <img src="https://latex.codecogs.com/png.latex?%5Cdet(L)"> for simplicity, we have:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20%5Chat%7B%5Cmathcal%7BD%7D%7D_s(y)%20=%20e%5E%7B-%5Cpi%20s%5E2%20%7Cy%7C%5E2%7D.%20"></p>
+<p>Why does this matter? Our goal is to measure how “uniform” <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BD%7D_s"> is. Intuitively, if <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BD%7D_s"> were perfectly uniform, its Fourier transform would have only one non-zero coefficient at <img src="https://latex.codecogs.com/png.latex?y%20=%200">, with <img src="https://latex.codecogs.com/png.latex?%5Chat%7B%5Cmathcal%7BD%7D%7D_s(0)%20=%201">. All other coefficients would be zero, as a uniform distribution requires no additional frequencies to describe it.</p>
+<p>In general, we can define a “uniformity metric” for <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BD%7D_s"> by summing the Fourier coefficients for all non-zero frequencies. The smaller this sum, the closer <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BD%7D_s"> is to uniform. This metric is expressed as:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20%5Crho_%7B1/s%7D(L%5E*%20%5Csetminus%20%5C%7B0%5C%7D)%20=%20%5Csum_%7By%20%5Cin%20L%5E*%20%5Csetminus%20%5C%7B0%5C%7D%7D%20e%5E%7B-%5Cpi%20%7Cy%7C%5E2%20s%5E2%7D.%20"></p>
+<p>This notation aligns with standard conventions, where <img src="https://latex.codecogs.com/png.latex?%5Crho"> represents the Gaussian mass. The goal in applications is to ensure that <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BD%7D_s"> is sufficiently uniform by keeping this metric below a chosen threshold <img src="https://latex.codecogs.com/png.latex?%5Cepsilon">:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20%5Crho_%7B1/s%7D(L%5E*%20%5Csetminus%20%5C%7B0%5C%7D)%20%3C%20%5Cepsilon.%20"></p>
+<p>While perfect uniformity is unattainable, this approach provides a practical and rigorous way to ensure <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BD%7D_s"> is “uniform enough” for cryptographic security.</p>
 </section>
-<section id="conclusions" class="level2">
-<h2 class="anchored" data-anchor-id="conclusions">Conclusions</h2>
-<p>In this short blog post, we constructed a simple classifier to detect web defacement. Our classifier gets 80% accuracy on the validation dataset. I will continue to improve it as I follow the course, so stay tuned 😎</p>
-<p>This post is based on the <a href="https://www.kaggle.com/code/jhoward/is-it-a-bird-creating-a-model-from-your-own-data">first lab</a> of the <a href="https://course.fast.ai">fast.ai</a> coure so thank you <a href="https://twitter.com/jeremyphoward">Jeremy Howard</a> 😃 <img src="https://miiip.github.io/posts/is-it-hacked_files/figure-html/b9d2f0b6-1-785768e2-4b4e-494f-bfa3-e735bc0c0703.png" class="img-fluid" alt="image.png"></p>
-
-
+<section id="conclusions" class="level1">
+<h1>Conclusions</h1>
+<p>Let’s circle back to our motivation: we aimed to sample an error vector with a specific norm that appears uniformly distributed when reduced modulo the fundamental domain. The solution? Sample the vector from a Gaussian distribution <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BG%7D_s"> and reduce it to the fundamental domain. We observed that as the standard deviation <img src="https://latex.codecogs.com/png.latex?s"> increases, the reduced distribution becomes more uniform. To measure this uniformity, we introduced the metric <img src="https://latex.codecogs.com/png.latex?%5Crho_%7B1/s%7D(L%5E*%20%5Csetminus%20%5C%7B0%5C%7D)">.</p>
+<p>Now, for the final piece: the <strong>smoothing parameter</strong> of a lattice, denoted by <img src="https://latex.codecogs.com/png.latex?%5Ceta_%7B%5Cepsilon%7D(L)">, is defined as the smallest <img src="https://latex.codecogs.com/png.latex?s"> such that:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20%5Crho_%7B1/s%7D(L%5E*%20%5Csetminus%20%5C%7B0%5C%7D)%20%3C%20%5Cepsilon.%20"></p>
+<p>In this article, we’ve developed some intuition around the smoothing parameter. But the real magic lies in how Regev used this concept in one of the most groundbreaking security reductions in lattice-based cryptography. Here’s a teaser: it connects to the shortest vector problem on the dual lattice. Curious? Stay tuned for the next chapter of this fascinating journey!</p>
+<p><sub><i>Disclaimer: This python code was generated by GenAI.</i></sub></p>
 </section>
+<section id="resources" class="level1">
+<h1>Resources</h1>
+<p><a href="https://www.cs.princeton.edu/courses/archive/spr08/cos598D/lattices.pdf">Lattices Part II — Dual Lattices, Fourier Transform, Smoothing Parameter, Public Key Encryption</a></p>
+<p><a href="https://cims.nyu.edu/~regev/papers/average.pdf">Worst-case to Average-case Reductions based on Gaussian Measures</a></p>
+
+
 </section>
 
  ]]></description>
-  <category>ml-cybersecurity</category>
-  <guid>https://miiip.github.io/posts/is-it-hacked.html</guid>
-  <pubDate>Fri, 14 Apr 2023 21:00:00 GMT</pubDate>
+  <category>foundations-cryptography</category>
+  <guid>https://miiip.github.io/posts/Gaussian.html</guid>
+  <pubDate>Sat, 26 Apr 2025 21:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>

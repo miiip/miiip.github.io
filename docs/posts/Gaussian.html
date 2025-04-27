@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.29">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Mihail Plesa">
+<meta name="dcterms.date" content="2025-04-27">
+
+<title>A Shred of Light on the Smoothing Parameter in Lattices – Blog</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-0815c480559380816a4d1ea211a47e91.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-0eb82545807252168e0075c616c77c8b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Blog</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../presentations.html"> 
+<span class="menu-text">Presentations</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../publications.html"> 
+<span class="menu-text">Publications</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/miiip"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/miiipus"> <i class="bi bi-twitter" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="../index.xml"> <i class="bi bi-rss" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">A Shred of Light on the Smoothing Parameter in Lattices</h1>
+                                <div class="quarto-categories">
+                <div class="quarto-category">foundations-cryptography</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Mihail Plesa </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">April 27, 2025</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>If you’ve delved into lattice-based cryptography, you’ve probably encountered the intriguing concept of the smoothing parameter. In this post, we’ll break it down step by step, “reverse engineering” this essential lattice parameter. The aim? To help you develop a clear and intuitive understanding of it—rooted in solid mathematical principles (and maybe a touch of fun)! 😊</p>
+<p>One of the standout features of lattice-based cryptography is its robust worst-case to average-case reduction security proof. Here’s the essence: when we set up a lattice-based cryptosystem, elements like secret keys and noise are generated randomly. If we assume an attacker cannot solve the underlying mathematical problem for a random instance, the system is said to have average-case security. But lattice-based cryptography takes this a step further. It provides rigorous proofs showing that solving a random (average-case) instance of certain lattice problems is at least as hard as solving the worst-case instance of a related problem. In simpler terms, if an attacker can break a random instance, they can also crack the hardest instances. This foundational property greatly boosts our confidence in the security of lattice-based cryptography.</p>
+<p>Let’s begin with the big picture: many security proofs in the lattice world rely on the following structure:</p>
+<ol type="1">
+<li>Choose a lattice point.<br>
+</li>
+<li>Randomly generate a noise vector.<br>
+</li>
+<li>Add the noise to the lattice point and reduce the result modulo the fundamental domain.</li>
+</ol>
+<p>To make this more concrete, consider an example in <span class="math inline">\(\mathbb{R}^2\)</span>. Here, the chosen lattice point is represented by the green point, the noise by the red vector, the sum of the two by the blue point, and the reduction modulo the fundamental domain (the hashed area) by the ‘x’ point.</p>
+<p>For clarity and completeness, let’s introduce some notations:</p>
+<ol type="1">
+<li><span class="math inline">\(L\)</span> represents the lattice.<br>
+</li>
+<li><span class="math inline">\(B \in \mathbb{R}^{n \times n}\)</span> is the basis of the lattice <span class="math inline">\(L\)</span>.<br>
+</li>
+<li><span class="math inline">\(\mathcal{P}(B)\)</span> denotes the fundamental domain of the lattice.</li>
+</ol>
+<p>This structure forms the foundation for understanding key concepts in lattice-based cryptography.</p>
+<div id="8b382abf" class="cell" data-execution_count="2">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib.patches <span class="im">import</span> Polygon</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Function to generate lattice points</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_lattice(basis, x_range, y_range):</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    points <span class="op">=</span> []</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(x_range[<span class="dv">0</span>], x_range[<span class="dv">1</span>]):</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(y_range[<span class="dv">0</span>], y_range[<span class="dv">1</span>]):</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>            point <span class="op">=</span> i <span class="op">*</span> basis[:, <span class="dv">0</span>] <span class="op">+</span> j <span class="op">*</span> basis[:, <span class="dv">1</span>]</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>            points.append(point)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.array(points)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Function to reduce a point modulo the fundamental domain</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> reduce_mod_basis(point, basis):</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    inv_basis <span class="op">=</span> np.linalg.inv(basis)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    coeffs <span class="op">=</span> np.dot(inv_basis, point)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    coeffs <span class="op">=</span> coeffs <span class="op">-</span> np.floor(coeffs) <span class="co"># Reduce coefficients mod 1</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.dot(basis, coeffs)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the lattice basis (2D) with larger vectors</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>basis <span class="op">=</span> np.array([[<span class="dv">6</span>, <span class="dv">2</span>], [<span class="dv">3</span>, <span class="dv">5</span>]])</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate lattice points</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>lattice_points <span class="op">=</span> generate_lattice(basis, x_range<span class="op">=</span>(<span class="op">-</span><span class="dv">2</span>, <span class="dv">3</span>), y_range<span class="op">=</span>(<span class="op">-</span><span class="dv">2</span>, <span class="dv">3</span>))</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Select a lattice point (green dot)</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>lattice_point <span class="op">=</span> <span class="dv">1</span> <span class="op">*</span> basis[:, <span class="dv">0</span>] <span class="op">+</span> <span class="dv">1</span> <span class="op">*</span> basis[:, <span class="dv">1</span>] <span class="co"># Example: (1, 1) in lattice coordinates</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Add noise (larger random vector)</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>noise <span class="op">=</span> np.random.uniform(<span class="op">-</span><span class="dv">5</span>, <span class="dv">5</span>, size<span class="op">=</span><span class="dv">2</span>) <span class="co"># Larger noise</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>noisy_point <span class="op">=</span> lattice_point <span class="op">+</span> noise</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="co"># Reduce modulo the fundamental domain</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>reduced_point <span class="op">=</span> reduce_mod_basis(noisy_point, basis)</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the lattice</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">10</span>))</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>plt.scatter(lattice_points[:, <span class="dv">0</span>], lattice_points[:, <span class="dv">1</span>], color<span class="op">=</span><span class="st">'black'</span>, s<span class="op">=</span><span class="dv">10</span>, label<span class="op">=</span><span class="st">'Lattice Points'</span>)</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot all parallelograms in the lattice</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> point <span class="kw">in</span> lattice_points:</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>    parallelogram <span class="op">=</span> np.array([</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>        point,</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>        point <span class="op">+</span> basis[:, <span class="dv">0</span>],</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>        point <span class="op">+</span> basis[:, <span class="dv">0</span>] <span class="op">+</span> basis[:, <span class="dv">1</span>],</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>        point <span class="op">+</span> basis[:, <span class="dv">1</span>],</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>        point</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>    ])</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>    plt.plot(parallelogram[:, <span class="dv">0</span>], parallelogram[:, <span class="dv">1</span>], color<span class="op">=</span><span class="st">'orange'</span>, linestyle<span class="op">=</span><span class="st">'dotted'</span>, linewidth<span class="op">=</span><span class="fl">0.8</span>)</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a><span class="co"># Highlight the fundamental domain (parallelogram at the origin) with a hashed pattern</span></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>fundamental_parallelogram <span class="op">=</span> np.array([</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">0</span>, <span class="dv">0</span>],</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>    basis[:, <span class="dv">0</span>],</span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>    basis[:, <span class="dv">0</span>] <span class="op">+</span> basis[:, <span class="dv">1</span>],</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>    basis[:, <span class="dv">1</span>],</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">0</span>, <span class="dv">0</span>]</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>polygon <span class="op">=</span> Polygon(fundamental_parallelogram, closed<span class="op">=</span><span class="va">True</span>, facecolor<span class="op">=</span><span class="st">'none'</span>, edgecolor<span class="op">=</span><span class="st">'orange'</span>, hatch<span class="op">=</span><span class="st">'//'</span>, linewidth<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>plt.gca().add_patch(polygon)</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the lattice point (green dot)</span></span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a>plt.scatter(lattice_point[<span class="dv">0</span>], lattice_point[<span class="dv">1</span>], color<span class="op">=</span><span class="st">'green'</span>, s<span class="op">=</span><span class="dv">20</span>, label<span class="op">=</span><span class="st">'Chosen lattice point (step 1)'</span>)</span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the noise vector (larger arrow)</span></span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a>plt.quiver(</span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a>    lattice_point[<span class="dv">0</span>], lattice_point[<span class="dv">1</span>], noise[<span class="dv">0</span>], noise[<span class="dv">1</span>],</span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a>    angles<span class="op">=</span><span class="st">'xy'</span>, scale_units<span class="op">=</span><span class="st">'xy'</span>, scale<span class="op">=</span><span class="dv">1</span>, color<span class="op">=</span><span class="st">'red'</span>, width<span class="op">=</span><span class="fl">0.005</span>, label<span class="op">=</span><span class="st">'Noise Vector (step 2)'</span></span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the noisy point</span></span>
+<span id="cb1-73"><a href="#cb1-73" aria-hidden="true" tabindex="-1"></a>plt.scatter(noisy_point[<span class="dv">0</span>], noisy_point[<span class="dv">1</span>], color<span class="op">=</span><span class="st">'blue'</span>, s<span class="op">=</span><span class="dv">20</span>, label<span class="op">=</span><span class="st">'Noisy Point'</span>)</span>
+<span id="cb1-74"><a href="#cb1-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-75"><a href="#cb1-75" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the reduced point</span></span>
+<span id="cb1-76"><a href="#cb1-76" aria-hidden="true" tabindex="-1"></a>plt.scatter(reduced_point[<span class="dv">0</span>], reduced_point[<span class="dv">1</span>], color<span class="op">=</span><span class="st">'purple'</span>, s<span class="op">=</span><span class="dv">20</span>, marker<span class="op">=</span><span class="st">'x'</span>, label<span class="op">=</span><span class="st">'Reduced Point (step 3)'</span>)</span>
+<span id="cb1-77"><a href="#cb1-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-78"><a href="#cb1-78" aria-hidden="true" tabindex="-1"></a><span class="co"># Mark the basis vectors</span></span>
+<span id="cb1-79"><a href="#cb1-79" aria-hidden="true" tabindex="-1"></a>plt.quiver(</span>
+<span id="cb1-80"><a href="#cb1-80" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span>, <span class="dv">0</span>, basis[<span class="dv">0</span>, <span class="dv">0</span>], basis[<span class="dv">1</span>, <span class="dv">0</span>],</span>
+<span id="cb1-81"><a href="#cb1-81" aria-hidden="true" tabindex="-1"></a>    angles<span class="op">=</span><span class="st">'xy'</span>, scale_units<span class="op">=</span><span class="st">'xy'</span>, scale<span class="op">=</span><span class="dv">1</span>, color<span class="op">=</span><span class="st">'magenta'</span>, width<span class="op">=</span><span class="fl">0.005</span>, label<span class="op">=</span><span class="st">'Basis Vector 1'</span></span>
+<span id="cb1-82"><a href="#cb1-82" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-83"><a href="#cb1-83" aria-hidden="true" tabindex="-1"></a>plt.quiver(</span>
+<span id="cb1-84"><a href="#cb1-84" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span>, <span class="dv">0</span>, basis[<span class="dv">0</span>, <span class="dv">1</span>], basis[<span class="dv">1</span>, <span class="dv">1</span>],</span>
+<span id="cb1-85"><a href="#cb1-85" aria-hidden="true" tabindex="-1"></a>    angles<span class="op">=</span><span class="st">'xy'</span>, scale_units<span class="op">=</span><span class="st">'xy'</span>, scale<span class="op">=</span><span class="dv">1</span>, color<span class="op">=</span><span class="st">'cyan'</span>, width<span class="op">=</span><span class="fl">0.005</span>, label<span class="op">=</span><span class="st">'Basis Vector 2'</span></span>
+<span id="cb1-86"><a href="#cb1-86" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-87"><a href="#cb1-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-88"><a href="#cb1-88" aria-hidden="true" tabindex="-1"></a><span class="co"># Add labels and legend</span></span>
+<span id="cb1-89"><a href="#cb1-89" aria-hidden="true" tabindex="-1"></a>plt.axhline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">'gray'</span>, linewidth<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb1-90"><a href="#cb1-90" aria-hidden="true" tabindex="-1"></a>plt.axvline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">'gray'</span>, linewidth<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb1-91"><a href="#cb1-91" aria-hidden="true" tabindex="-1"></a>plt.grid(color<span class="op">=</span><span class="st">'lightgray'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, linewidth<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb1-92"><a href="#cb1-92" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb1-93"><a href="#cb1-93" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Lattice Visualization with Hashed Fundamental Domain'</span>)</span>
+<span id="cb1-94"><a href="#cb1-94" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'x'</span>)</span>
+<span id="cb1-95"><a href="#cb1-95" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'y'</span>)</span>
+<span id="cb1-96"><a href="#cb1-96" aria-hidden="true" tabindex="-1"></a>plt.axis(<span class="st">'equal'</span>)</span>
+<span id="cb1-97"><a href="#cb1-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-98"><a href="#cb1-98" aria-hidden="true" tabindex="-1"></a><span class="co"># Zoom in on a smaller region of the lattice</span></span>
+<span id="cb1-99"><a href="#cb1-99" aria-hidden="true" tabindex="-1"></a>plt.axis(<span class="st">'auto'</span>)</span>
+<span id="cb1-100"><a href="#cb1-100" aria-hidden="true" tabindex="-1"></a>plt.xlim(<span class="op">-</span><span class="dv">10</span>, <span class="dv">20</span>)</span>
+<span id="cb1-101"><a href="#cb1-101" aria-hidden="true" tabindex="-1"></a>plt.ylim(<span class="op">-</span><span class="dv">10</span>, <span class="dv">20</span>)</span>
+<span id="cb1-102"><a href="#cb1-102" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-103"><a href="#cb1-103" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Gaussian_files/figure-html/cell-2-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="the-problem" class="level1">
+<h1>The problem</h1>
+<p>Now, let’s introduce some constraints:</p>
+<ol type="1">
+<li>We want the expected norm of the error vector to be a specific value, denoted as <span class="math inline">\(s\)</span>.<br>
+</li>
+<li>As with most things in cryptography, we want the result of the reduction to appear as if it were sampled from a uniform distribution.</li>
+</ol>
+<p>Why do we need these properties? Well, that’s a story for another article! 😊</p>
+<p>At first glance, one might think: “If we want vectors that look uniformly distributed, why not just sample each coordinate from a uniform distribution?” While this approach works perfectly for the second property, it fails to satisfy the first. Sampling each coordinate uniformly results in vectors with norms that deviate significantly from the desired value <span class="math inline">\(s\)</span>.</p>
+<p>To focus on the first property, one solution is to sample each coordinate from a Gaussian distribution with a standard deviation of <span class="math inline">\(s / \sqrt{n}\)</span>, where <span class="math inline">\(n\)</span> is the number of coordinates. This ensures the expected norm of the vector is <span class="math inline">\(s\)</span>. But what about the “uniform-like” appearance?</p>
+<p>Let’s build some intuition. A lattice has a clear periodic structure. Looking at the earlier example, we see the fundamental domain (a single cell) repeating endlessly to cover the entire space. This means any point in space can be expressed as the sum of a point in the fundamental domain and a lattice point.</p>
+<p>From another perspective, if we repeatedly translate the fundamental domain by lattice points, we cover the entire space. Thus, every point can be uniquely written as the sum of a lattice point and a point within the fundamental domain. This is illustrated in the figure below and can be expressed formally as:</p>
+<p><span class="math display">\[ w = t + v, \text{ for a unique } t \in \mathcal{P}(B) \text{ and a unique } v \in L. \]</span></p>
+<p>This decomposition is key to understanding how we achieve both properties simultaneously.</p>
+<div id="7dab36dc" class="cell" data-execution_count="3">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib.patches <span class="im">import</span> Polygon</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Function to generate lattice points</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_lattice(basis, x_range, y_range):</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    points <span class="op">=</span> []</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(x_range[<span class="dv">0</span>], x_range[<span class="dv">1</span>]):</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(y_range[<span class="dv">0</span>], y_range[<span class="dv">1</span>]):</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>            point <span class="op">=</span> i <span class="op">*</span> basis[:, <span class="dv">0</span>] <span class="op">+</span> j <span class="op">*</span> basis[:, <span class="dv">1</span>]</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>            points.append(point)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.array(points)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Function to reduce a point modulo the fundamental domain</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> reduce_mod_basis(point, basis):</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    inv_basis <span class="op">=</span> np.linalg.inv(basis)</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    coeffs <span class="op">=</span> np.dot(inv_basis, point)</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    lattice_point <span class="op">=</span> np.dot(basis, np.floor(coeffs))  <span class="co"># Lattice point</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    fundamental_point <span class="op">=</span> point <span class="op">-</span> lattice_point       <span class="co"># Point in the fundamental domain</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> fundamental_point, lattice_point</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the lattice basis (2D)</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>basis <span class="op">=</span> np.array([[<span class="dv">6</span>, <span class="dv">2</span>], [<span class="dv">3</span>, <span class="dv">5</span>]])</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate lattice points</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>lattice_points <span class="op">=</span> generate_lattice(basis, x_range<span class="op">=</span>(<span class="op">-</span><span class="dv">3</span>, <span class="dv">4</span>), y_range<span class="op">=</span>(<span class="op">-</span><span class="dv">3</span>, <span class="dv">4</span>))</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Define a point closer to the origin</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>outside_point <span class="op">=</span> np.array([<span class="dv">8</span>, <span class="dv">7</span>])  <span class="co"># Example point closer to the origin</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="co"># Decompose the point into a fundamental domain point and a lattice point</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>fundamental_point, lattice_point <span class="op">=</span> reduce_mod_basis(outside_point, basis)</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the lattice</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">10</span>))</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>plt.scatter(lattice_points[:, <span class="dv">0</span>], lattice_points[:, <span class="dv">1</span>], color<span class="op">=</span><span class="st">'black'</span>, s<span class="op">=</span><span class="dv">10</span>, label<span class="op">=</span><span class="st">'Lattice Points'</span>)</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a><span class="co"># Highlight the fundamental domain (parallelogram at the origin)</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>fundamental_parallelogram <span class="op">=</span> np.array([</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">0</span>, <span class="dv">0</span>],</span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>    basis[:, <span class="dv">0</span>],</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>    basis[:, <span class="dv">0</span>] <span class="op">+</span> basis[:, <span class="dv">1</span>],</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>    basis[:, <span class="dv">1</span>],</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">0</span>, <span class="dv">0</span>]</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>polygon <span class="op">=</span> Polygon(fundamental_parallelogram, closed<span class="op">=</span><span class="va">True</span>, facecolor<span class="op">=</span><span class="st">'none'</span>, edgecolor<span class="op">=</span><span class="st">'orange'</span>, hatch<span class="op">=</span><span class="st">'//'</span>, linewidth<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>plt.gca().add_patch(polygon)</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the point outside the fundamental domain</span></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>plt.scatter(outside_point[<span class="dv">0</span>], outside_point[<span class="dv">1</span>], color<span class="op">=</span><span class="st">'blue'</span>, s<span class="op">=</span><span class="dv">50</span>, label<span class="op">=</span><span class="st">'Point Outside Fundamental Domain'</span>)</span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the fundamental domain point</span></span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>plt.scatter(fundamental_point[<span class="dv">0</span>], fundamental_point[<span class="dv">1</span>], color<span class="op">=</span><span class="st">'purple'</span>, s<span class="op">=</span><span class="dv">50</span>, label<span class="op">=</span><span class="st">'Point in Fundamental Domain'</span>)</span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the lattice point</span></span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>plt.scatter(lattice_point[<span class="dv">0</span>], lattice_point[<span class="dv">1</span>], color<span class="op">=</span><span class="st">'red'</span>, s<span class="op">=</span><span class="dv">50</span>, label<span class="op">=</span><span class="st">'Lattice Point'</span>)</span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a><span class="co"># Draw vector from origin to the outside point</span></span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>plt.quiver(</span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span>, <span class="dv">0</span>,</span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>    outside_point[<span class="dv">0</span>], outside_point[<span class="dv">1</span>],</span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a>    angles<span class="op">=</span><span class="st">'xy'</span>, scale_units<span class="op">=</span><span class="st">'xy'</span>, scale<span class="op">=</span><span class="dv">1</span>, color<span class="op">=</span><span class="st">'blue'</span>, width<span class="op">=</span><span class="fl">0.005</span>, label<span class="op">=</span><span class="st">'Vector: Origin to Point'</span></span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a><span class="co"># Draw vector from origin to the fundamental domain point</span></span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>plt.quiver(</span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span>, <span class="dv">0</span>,</span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>    fundamental_point[<span class="dv">0</span>], fundamental_point[<span class="dv">1</span>],</span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>    angles<span class="op">=</span><span class="st">'xy'</span>, scale_units<span class="op">=</span><span class="st">'xy'</span>, scale<span class="op">=</span><span class="dv">1</span>, color<span class="op">=</span><span class="st">'purple'</span>, width<span class="op">=</span><span class="fl">0.005</span>, label<span class="op">=</span><span class="st">'Vector: Origin to Reduction (Fundamental Domain)'</span></span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a><span class="co"># Draw vector from origin to the lattice point</span></span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>plt.quiver(</span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span>, <span class="dv">0</span>,</span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a>    lattice_point[<span class="dv">0</span>], lattice_point[<span class="dv">1</span>],</span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>    angles<span class="op">=</span><span class="st">'xy'</span>, scale_units<span class="op">=</span><span class="st">'xy'</span>, scale<span class="op">=</span><span class="dv">1</span>, color<span class="op">=</span><span class="st">'red'</span>, width<span class="op">=</span><span class="fl">0.005</span>, label<span class="op">=</span><span class="st">'Vector: Origin to Lattice Point'</span></span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a><span class="co"># Add support lines to form the parallelogram</span></span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a><span class="co"># Line from lattice point to the outside point</span></span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>plt.plot(</span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>    [lattice_point[<span class="dv">0</span>], outside_point[<span class="dv">0</span>]],</span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a>    [lattice_point[<span class="dv">1</span>], outside_point[<span class="dv">1</span>]],</span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">'gray'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, linewidth<span class="op">=</span><span class="dv">1</span>, label<span class="op">=</span><span class="st">'Support Line'</span></span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a><span class="co"># Line from fundamental point to the outside point</span></span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a>plt.plot(</span>
+<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a>    [fundamental_point[<span class="dv">0</span>], outside_point[<span class="dv">0</span>]],</span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a>    [fundamental_point[<span class="dv">1</span>], outside_point[<span class="dv">1</span>]],</span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">'gray'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, linewidth<span class="op">=</span><span class="dv">1</span></span>
+<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a><span class="co"># Add labels and legend</span></span>
+<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a>plt.axhline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">'gray'</span>, linewidth<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a>plt.axvline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">'gray'</span>, linewidth<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a>plt.grid(color<span class="op">=</span><span class="st">'lightgray'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, linewidth<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Decomposition of a Point with Parallelogram Support Lines'</span>)</span>
+<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'x'</span>)</span>
+<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'y'</span>)</span>
+<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a>plt.axis(<span class="st">'equal'</span>)</span>
+<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a><span class="co"># Adjust zoom level for better visualization</span></span>
+<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a>plt.axis(<span class="st">'auto'</span>)</span>
+<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a>plt.xlim(<span class="op">-</span><span class="dv">5</span>, <span class="dv">15</span>)</span>
+<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a>plt.ylim(<span class="op">-</span><span class="dv">5</span>, <span class="dv">15</span>)</span>
+<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Gaussian_files/figure-html/cell-3-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="gaussian-reduction" class="level1">
+<h1>Gaussian reduction</h1>
+<p>This equivalence relation naturally emerges: two points are considered equivalent if they map to the same point in the fundamental domain. In other words, two points are equivalent if they differ by a lattice vector.</p>
+<p>Now, let’s revisit the Gaussian distribution, denoted by <span class="math inline">\(\mathcal{G}_s\)</span>, which describes the probability distribution of vectors with an expected norm <span class="math inline">\(s\)</span>. For each point <span class="math inline">\(x \in \mathbb{R}^n\)</span>, <span class="math inline">\(\mathcal{G}_s\)</span> assigns a probability density value <span class="math inline">\(\mathcal{G}_s(x)\)</span>.</p>
+<p>This leads to an intriguing question:</p>
+<p><strong>How does the Gaussian distribution behave under the equivalence relation?</strong><br>
+<strong>What is the density value assigned to a point in the fundamental domain?</strong></p>
+<p>Recall that for every point <span class="math inline">\(t \in \mathcal{P}(B)\)</span> (the fundamental domain), there are infinitely many equivalent points in <span class="math inline">\(\mathbb{R}^n\)</span> that differ by lattice vectors. For instance, <span class="math inline">\(\mathcal{G}_s\)</span> assigns a density value to <span class="math inline">\(t\)</span> and another density value to each equivalent point <span class="math inline">\(w = t + v\)</span>, where <span class="math inline">\(v\)</span> is any lattice vector. However, under the equivalence relation, all these points <span class="math inline">\(w\)</span> are treated as “the same” as <span class="math inline">\(t\)</span>. So, how do we assign a single density value to <span class="math inline">\(t\)</span>?</p>
+<p>A natural solution is to define a new probability distribution, <span class="math inline">\(\mathcal{D}_s\)</span>, restricted to the fundamental domain. The density value assigned by <span class="math inline">\(\mathcal{D}_s\)</span> to a point <span class="math inline">\(t \in \mathcal{P}(B)\)</span> is the sum of all density values assigned by <span class="math inline">\(\mathcal{G}_s\)</span> to its equivalent points <span class="math inline">\(w = t + v\)</span>, for all <span class="math inline">\(v \in L\)</span>. Formally, this is written as:</p>
+<p><span class="math display">\[ \mathcal{D}_s(x) = \sum_{z \in L} \mathcal{G}_s(x + z) \]</span></p>
+<p>This construction ensures that <span class="math inline">\(\mathcal{D}_s\)</span> respects the equivalence relation and is properly defined over the fundamental domain.</p>
+<p>Let’s take another look at our goal. We want to sample an error vector from a Gaussian distribution with an expected norm of <span class="math inline">\(s\)</span>. However, after reducing this error to the fundamental domain, it should appear as though it was sampled from a uniform distribution. In other words, while the error is initially drawn from <span class="math inline">\(\mathcal{G}_s\)</span>, we want the resulting distribution <span class="math inline">\(\mathcal{D}_s\)</span> to be indistinguishable from a uniform distribution.</p>
+<p>To build intuition, let’s consider a simple lattice, <span class="math inline">\(\mathbb{Z}\)</span>, with the fundamental domain <span class="math inline">\([0, 1)\)</span>. We’ll explore how <span class="math inline">\(\mathcal{D}_s\)</span> behaves for different values of <span class="math inline">\(s\)</span>. For small values of <span class="math inline">\(s\)</span> (e.g., <span class="math inline">\(0.1\)</span>, <span class="math inline">\(0.2\)</span>), <span class="math inline">\(\mathcal{D}_s\)</span> is far from uniform—it has noticeable peaks and valleys, unlike the flat line of a uniform distribution. But as <span class="math inline">\(s\)</span> increases, something fascinating happens: <span class="math inline">\(\mathcal{D}_s\)</span> starts to flatten out, gradually resembling a uniform distribution. For sufficiently large <span class="math inline">\(s\)</span>, <span class="math inline">\(\mathcal{D}_s\)</span> becomes nearly indistinguishable from uniform.</p>
+<p>This behavior is key to achieving both properties: maintaining the expected norm of <span class="math inline">\(s\)</span> while ensuring the reduced error appears uniform.</p>
+<div id="77b41147" class="cell" data-execution_count="25">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Gaussian function G_s</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> G_s(x, s):</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    scale <span class="op">=</span> np.sqrt(<span class="dv">2</span> <span class="op">*</span> np.pi) <span class="op">*</span> s</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (<span class="dv">1</span> <span class="op">/</span> scale) <span class="op">*</span> np.exp(<span class="op">-</span>np.pi <span class="op">*</span> (x <span class="op">/</span> scale) <span class="op">**</span> <span class="dv">2</span>)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Periodic sum D_s over the integer lattice</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> D_s(x, s, num_terms<span class="op">=</span><span class="dv">100</span>):</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">sum</span>(G_s(x <span class="op">-</span> z, s) <span class="cf">for</span> z <span class="kw">in</span> <span class="bu">range</span>(<span class="op">-</span>num_terms, num_terms <span class="op">+</span> <span class="dv">1</span>))</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Static plot for multiple values of s</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_static_Gs_Ds(s_values):</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    fig, axs <span class="op">=</span> plt.subplots(<span class="bu">len</span>(s_values), <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">3</span> <span class="op">*</span> <span class="bu">len</span>(s_values)))</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i, s <span class="kw">in</span> <span class="bu">enumerate</span>(s_values):</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Plot G_s over the real line</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>        x1 <span class="op">=</span> np.linspace(<span class="op">-</span><span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1000</span>)</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>        axs[i, <span class="dv">0</span>].plot(x1, G_s(x1, s), label<span class="op">=</span><span class="ss">f'$G_s$, s=</span><span class="sc">{</span>s<span class="sc">:.2f}</span><span class="ss">'</span>)</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>        axs[i, <span class="dv">0</span>].set_title(<span class="ss">f"$G_s(x)$ for s=</span><span class="sc">{</span>s<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>        axs[i, <span class="dv">0</span>].set_ylabel(<span class="st">"$G_s(x)$"</span>)</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>        axs[i, <span class="dv">0</span>].legend()</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>        axs[i, <span class="dv">0</span>].grid(<span class="va">True</span>)</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Plot D_s over extended domain to show multiple periods</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>        x2 <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1500</span>)</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>        y2 <span class="op">=</span> [D_s(val, s) <span class="cf">for</span> val <span class="kw">in</span> x2]</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>        axs[i, <span class="dv">1</span>].plot(x2, y2, label<span class="op">=</span><span class="ss">f'$D_s$, s=</span><span class="sc">{</span>s<span class="sc">:.2f}</span><span class="ss">'</span>)</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>        axs[i, <span class="dv">1</span>].set_title(<span class="ss">f"$D_s(x)$ for s=</span><span class="sc">{</span>s<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>        axs[i, <span class="dv">1</span>].set_xlabel(<span class="st">"x"</span>)</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>        axs[i, <span class="dv">1</span>].set_ylabel(<span class="st">"$D_s(x)$"</span>)</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>        axs[i, <span class="dv">1</span>].legend()</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>        axs[i, <span class="dv">1</span>].grid(<span class="va">True</span>)</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>    plt.tight_layout()</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>    plt.show()</span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="co"># Values of s to plot</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>s_values <span class="op">=</span> [<span class="fl">0.2</span>, <span class="fl">0.7</span>, <span class="fl">1.27</span>, <span class="fl">1.5</span>]</span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>plot_static_Gs_Ds(s_values)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Gaussian_files/figure-html/cell-4-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>To summarize the big picture: our goal is to sample error vectors from a Gaussian distribution to achieve an expected norm of <span class="math inline">\(s\)</span>, while ensuring that the error appears uniformly distributed when reduced modulo the fundamental domain. The intuitive way to meet both requirements is to make the Gaussian distribution sufficiently wide.</p>
+<p>This makes sense intuitively: a Gaussian distribution is defined by its characteristic “hump.” When the distribution is wide enough and mapped into a small cell (the fundamental domain), the “hump” effect diminishes, producing a distribution that closely resembles uniformity.</p>
+<p>Now, we still have one crucial question to address: how “wide” does the Gaussian distribution need to be for <span class="math inline">\(\mathcal{D}_s\)</span> to appear uniform? To answer this, we need a way to measure how “uniform” <span class="math inline">\(\mathcal{D}_s\)</span> actually is. Here’s a hint: let’s visualize <span class="math inline">\(\mathcal{D}_s\)</span> by plotting it over the entire space. This will give us valuable insights into its behavior and help us determine the required “width.”</p>
+<div id="cd0fe5f8" class="cell" data-execution_count="27">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Gaussian function G_s</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> G_s(x, s):</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    scale <span class="op">=</span> np.sqrt(<span class="dv">2</span> <span class="op">*</span> np.pi) <span class="op">*</span> s</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (<span class="dv">1</span> <span class="op">/</span> scale) <span class="op">*</span> np.exp(<span class="op">-</span>np.pi <span class="op">*</span> (x <span class="op">/</span> scale) <span class="op">**</span> <span class="dv">2</span>)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Periodic sum D_s over the integer lattice</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> D_s(x, s, num_terms<span class="op">=</span><span class="dv">100</span>):</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">sum</span>(G_s(x <span class="op">-</span> z, s) <span class="cf">for</span> z <span class="kw">in</span> <span class="bu">range</span>(<span class="op">-</span>num_terms, num_terms <span class="op">+</span> <span class="dv">1</span>))</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Static plot for multiple values of s</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_static_Gs_Ds(s_values):</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    fig, axs <span class="op">=</span> plt.subplots(<span class="bu">len</span>(s_values), <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">3</span> <span class="op">*</span> <span class="bu">len</span>(s_values)))</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i, s <span class="kw">in</span> <span class="bu">enumerate</span>(s_values):</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Plot G_s over the real line</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>        x1 <span class="op">=</span> np.linspace(<span class="op">-</span><span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1000</span>)</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>        axs[i, <span class="dv">0</span>].plot(x1, G_s(x1, s), label<span class="op">=</span><span class="ss">f'$G_s$, s=</span><span class="sc">{</span>s<span class="sc">:.2f}</span><span class="ss">'</span>)</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>        axs[i, <span class="dv">0</span>].set_title(<span class="ss">f"$G_s(x)$ for s=</span><span class="sc">{</span>s<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>        axs[i, <span class="dv">0</span>].set_ylabel(<span class="st">"$G_s(x)$"</span>)</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>        axs[i, <span class="dv">0</span>].legend()</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>        axs[i, <span class="dv">0</span>].grid(<span class="va">True</span>)</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Plot D_s over extended domain to show multiple periods</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>        x2 <span class="op">=</span> np.linspace(<span class="op">-</span><span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">1500</span>)</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>        y2 <span class="op">=</span> [D_s(val, s) <span class="cf">for</span> val <span class="kw">in</span> x2]</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>        axs[i, <span class="dv">1</span>].plot(x2, y2, label<span class="op">=</span><span class="ss">f'$D_s$, s=</span><span class="sc">{</span>s<span class="sc">:.2f}</span><span class="ss">'</span>)</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>        axs[i, <span class="dv">1</span>].set_title(<span class="ss">f"$D_s(x)$ for s=</span><span class="sc">{</span>s<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>        axs[i, <span class="dv">1</span>].set_xlabel(<span class="st">"x"</span>)</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>        axs[i, <span class="dv">1</span>].set_ylabel(<span class="st">"$D_s(x)$"</span>)</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>        axs[i, <span class="dv">1</span>].legend()</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>        axs[i, <span class="dv">1</span>].grid(<span class="va">True</span>)</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>    plt.tight_layout()</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>    plt.show()</span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a><span class="co"># Values of s to plot</span></span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>s_values <span class="op">=</span> [<span class="fl">0.2</span>, <span class="fl">0.7</span>, <span class="fl">1.27</span>, <span class="fl">1.5</span>]</span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>plot_static_Gs_Ds(s_values)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Gaussian_files/figure-html/cell-5-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="fourier" class="level1">
+<h1>Fourier</h1>
+<p>It looks a lot like a periodic function, doesn’t it? This observation doesn’t change what we’ve noted about <span class="math inline">\(s\)</span>: as <span class="math inline">\(s\)</span> increases, <span class="math inline">\(\mathcal{D}_s\)</span> becomes increasingly uniform.</p>
+<p>This periodicity naturally leads us to think about Fourier analysis.</p>
+<p>Consider a “nice” periodic function <span class="math inline">\(f: \mathcal{P}(B) \rightarrow \mathbb{R}\)</span>. Why <span class="math inline">\(\mathcal{P}(B)\)</span> and not <span class="math inline">\(\mathbb{R}^n\)</span>? Well, since the function is periodic over the lattice, it’s sufficient to define it over a single lattice cell (the fundamental domain). Fourier transform allows us to express <span class="math inline">\(f\)</span> as a sum of periodic basis functions of the form <span class="math inline">\(x \mapsto e^{2\pi i \langle x, y \rangle}\)</span>.</p>
+<p>Let’s visualize some of these basis functions—or at least the real part of them—to build intuition!</p>
+<div id="f207db31" class="cell" data-execution_count="8">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Define parameters</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1000</span>)  <span class="co"># x values from 0 to 1</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>y_values <span class="op">=</span> [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">4</span>]  <span class="co"># Different y values</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot basis functions</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">6</span>))</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> y <span class="kw">in</span> y_values:</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    basis_function <span class="op">=</span> np.exp(<span class="ot">2j</span> <span class="op">*</span> np.pi <span class="op">*</span> y <span class="op">*</span> x)  <span class="co"># Complex exponential</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    plt.plot(x, np.real(basis_function), label<span class="op">=</span><span class="ss">f'y = </span><span class="sc">{</span>y<span class="sc">}</span><span class="ss">'</span>)  <span class="co"># Plot real part</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Customize the plot</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Basis Functions for Frequencies (y)'</span>)</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'x'</span>)</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Real Part of Basis Function'</span>)</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>plt.grid()</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Gaussian_files/figure-html/cell-6-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>We’ve plotted some basis functions for <span class="math inline">\(y = 1\)</span>, <span class="math inline">\(y = 2\)</span>, and <span class="math inline">\(y = 4\)</span>, but why not try <span class="math inline">\(y = \sqrt{2}\)</span> or <span class="math inline">\(y = 1.5\)</span>? What determines the allowed values for the frequencies? The answer lies in the periodicity of the basis functions:</p>
+<p><span class="math display">\[ e^{2\pi i \langle x, y \rangle} = e^{2\pi i \langle x+v, y \rangle}, \quad \text{for all } v \in L. \]</span></p>
+<p>Expanding this, we get:</p>
+<p><span class="math display">\[ e^{2\pi i \langle x+v, y \rangle} = e^{2\pi i \langle x, y \rangle} e^{2\pi i \langle v, y \rangle}, \]</span></p>
+<p>which implies:</p>
+<p><span class="math display">\[ e^{2\pi i \langle v, y \rangle} = 1. \]</span></p>
+<p>This condition holds when <span class="math inline">\(2\pi i \langle v, y \rangle = 0\)</span>, or equivalently, when <span class="math inline">\(\langle v, y \rangle \in \mathbb{Z}\)</span> for all <span class="math inline">\(v \in L\)</span>.</p>
+<p>In other words, the allowed frequencies are vectors <span class="math inline">\(y \in \mathbb{R}^n\)</span> such that their dot product with every point in the lattice <span class="math inline">\(L\)</span> is an integer. Interestingly, these frequencies themselves form a lattice, called the <strong>dual lattice</strong>, denoted by <span class="math inline">\(L^*\)</span>.</p>
+<p>Let’s return to our function <span class="math inline">\(f\)</span>, which can be expressed as:</p>
+<p><span class="math display">\[ f(x) = \sum_{y \in L^*} \hat{f}(y) e^{2\pi i \langle x, y \rangle}, \]</span></p>
+<p>where the Fourier coefficients <span class="math inline">\(\hat{f}(y)\)</span> are given by:</p>
+<p><span class="math display">\[ \hat{f}(y) = \frac{1}{\det(L)} \int_{\mathcal{P}(B)} f(x) e^{-2\pi i \langle x, y \rangle} \, dx. \]</span></p>
+<p>Here, <span class="math inline">\(\hat{f}(y)\)</span> represents the “weight” of the basis function <span class="math inline">\(e^{2\pi i \langle x, y \rangle}\)</span> in the decomposition. While this may seem abstract, in our case, <span class="math inline">\(f\)</span> is simply the Gaussian distribution <span class="math inline">\(\mathcal{D}_s(x)\)</span>, which represents the reduced Gaussian over the fundamental domain. For this specific function, the Fourier coefficients are straightforward to compute. Ignoring the constant <span class="math inline">\(\det(L)\)</span> for simplicity, we have:</p>
+<p><span class="math display">\[ \hat{\mathcal{D}}_s(y) = e^{-\pi s^2 |y|^2}. \]</span></p>
+<p>Why does this matter? Our goal is to measure how “uniform” <span class="math inline">\(\mathcal{D}_s\)</span> is. Intuitively, if <span class="math inline">\(\mathcal{D}_s\)</span> were perfectly uniform, its Fourier transform would have only one non-zero coefficient at <span class="math inline">\(y = 0\)</span>, with <span class="math inline">\(\hat{\mathcal{D}}_s(0) = 1\)</span>. All other coefficients would be zero, as a uniform distribution requires no additional frequencies to describe it.</p>
+<p>In general, we can define a “uniformity metric” for <span class="math inline">\(\mathcal{D}_s\)</span> by summing the Fourier coefficients for all non-zero frequencies. The smaller this sum, the closer <span class="math inline">\(\mathcal{D}_s\)</span> is to uniform. This metric is expressed as:</p>
+<p><span class="math display">\[ \rho_{1/s}(L^* \setminus \{0\}) = \sum_{y \in L^* \setminus \{0\}} e^{-\pi |y|^2 s^2}. \]</span></p>
+<p>This notation aligns with standard conventions, where <span class="math inline">\(\rho\)</span> represents the Gaussian mass. The goal in applications is to ensure that <span class="math inline">\(\mathcal{D}_s\)</span> is sufficiently uniform by keeping this metric below a chosen threshold <span class="math inline">\(\epsilon\)</span>:</p>
+<p><span class="math display">\[ \rho_{1/s}(L^* \setminus \{0\}) &lt; \epsilon. \]</span></p>
+<p>While perfect uniformity is unattainable, this approach provides a practical and rigorous way to ensure <span class="math inline">\(\mathcal{D}_s\)</span> is “uniform enough” for cryptographic security.</p>
+</section>
+<section id="conclusions" class="level1">
+<h1>Conclusions</h1>
+<p>Let’s circle back to our motivation: we aimed to sample an error vector with a specific norm that appears uniformly distributed when reduced modulo the fundamental domain. The solution? Sample the vector from a Gaussian distribution <span class="math inline">\(\mathcal{G}_s\)</span> and reduce it to the fundamental domain. We observed that as the standard deviation <span class="math inline">\(s\)</span> increases, the reduced distribution becomes more uniform. To measure this uniformity, we introduced the metric <span class="math inline">\(\rho_{1/s}(L^* \setminus \{0\})\)</span>.</p>
+<p>Now, for the final piece: the <strong>smoothing parameter</strong> of a lattice, denoted by <span class="math inline">\(\eta_{\epsilon}(L)\)</span>, is defined as the smallest <span class="math inline">\(s\)</span> such that:</p>
+<p><span class="math display">\[ \rho_{1/s}(L^* \setminus \{0\}) &lt; \epsilon. \]</span></p>
+<p>In this article, we’ve developed some intuition around the smoothing parameter. But the real magic lies in how Regev used this concept in one of the most groundbreaking security reductions in lattice-based cryptography. Here’s a teaser: it connects to the shortest vector problem on the dual lattice. Curious? Stay tuned for the next chapter of this fascinating journey!</p>
+<p><sub><i>Disclaimer: This python code was generated by GenAI.</i></sub></p>
+</section>
+<section id="resources" class="level1">
+<h1>Resources</h1>
+<p><a href="https://www.cs.princeton.edu/courses/archive/spr08/cos598D/lattices.pdf">Lattices Part II — Dual Lattices, Fourier Transform, Smoothing Parameter, Public Key Encryption</a></p>
+<p><a href="https://cims.nyu.edu/~regev/papers/average.pdf">Worst-case to Average-case Reductions based on Gaussian Measures</a></p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/miiip\.github\.io");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
