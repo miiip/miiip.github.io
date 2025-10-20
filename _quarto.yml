@@ -20,6 +20,8 @@ format:
   html:
     theme: cosmo
     css: styles.css
+    include-after-body: _includes/comments.html
+
 
 
 

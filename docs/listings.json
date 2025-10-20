@@ -1,16 +1,16 @@
 [
   {
-    "listing": "/index.html",
-    "items": [
-      "/posts/Gaussian.html"
-    ]
-  },
-  {
     "listing": "/presentations.html",
     "items": []
   },
   {
     "listing": "/publications.html",
     "items": []
+  },
+  {
+    "listing": "/index.html",
+    "items": [
+      "/posts/Gaussian.html"
+    ]
   }
 ]

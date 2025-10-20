@@ -9,7 +9,7 @@
 <link>https://miiip.github.io/</link>
 <atom:link href="https://miiip.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description>A blog about various applications of AI in cybersecurity and privacy</description>
-<generator>quarto-1.7.29</generator>
+<generator>quarto-1.8.25</generator>
 <lastBuildDate>Sat, 26 Apr 2025 21:00:00 GMT</lastBuildDate>
 <item>
   <title>A Shred of Light on the Smoothing Parameter in Lattices</title>
@@ -46,7 +46,7 @@
 <div id="8b382abf" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
 background-color: null;
@@ -634,7 +634,7 @@ font-style: inherit;">10</span>, <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">20</span>)</span>
 <span id="cb1-102"></span>
-<span id="cb1-103">plt.show()</span></code></pre></div>
+<span id="cb1-103">plt.show()</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
@@ -663,7 +663,7 @@ font-style: inherit;">20</span>)</span>
 <div id="7dab36dc" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"></span>
 <span id="cb2-2"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
@@ -1230,7 +1230,7 @@ font-style: inherit;">5</span>, <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">15</span>)</span>
 <span id="cb2-109"></span>
-<span id="cb2-110">plt.show()</span></code></pre></div>
+<span id="cb2-110">plt.show()</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
@@ -1258,7 +1258,7 @@ font-style: inherit;">15</span>)</span>
 <div id="77b41147" class="cell" data-execution_count="25">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="im" style="color: #00769E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
 background-color: null;
@@ -1507,7 +1507,7 @@ background-color: null;
 font-style: inherit;">1.27</span>, <span class="fl" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1.5</span>]</span>
-<span id="cb3-41">plot_static_Gs_Ds(s_values)</span></code></pre></div>
+<span id="cb3-41">plot_static_Gs_Ds(s_values)</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
@@ -1523,7 +1523,7 @@ font-style: inherit;">1.5</span>]</span>
 <div id="cd0fe5f8" class="cell" data-execution_count="27">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="im" style="color: #00769E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
 background-color: null;
@@ -1774,7 +1774,7 @@ background-color: null;
 font-style: inherit;">1.27</span>, <span class="fl" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1.5</span>]</span>
-<span id="cb4-41">plot_static_Gs_Ds(s_values)</span></code></pre></div>
+<span id="cb4-41">plot_static_Gs_Ds(s_values)</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
@@ -1794,7 +1794,7 @@ font-style: inherit;">1.5</span>]</span>
 <div id="f207db31" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="im" style="color: #00769E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
 background-color: null;
@@ -1889,7 +1889,7 @@ background-color: null;
 font-style: inherit;">'Real Part of Basis Function'</span>)</span>
 <span id="cb5-18">plt.legend()</span>
 <span id="cb5-19">plt.grid()</span>
-<span id="cb5-20">plt.show()</span></code></pre></div>
+<span id="cb5-20">plt.show()</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>

@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://miiip.github.io/index.html</loc>
-    <lastmod>2025-04-27T18:49:44.530Z</lastmod>
-  </url>
-  <url>
-    <loc>https://miiip.github.io/about.html</loc>
-    <lastmod>2025-04-27T18:46:11.079Z</lastmod>
-  </url>
-  <url>
     <loc>https://miiip.github.io/presentations.html</loc>
-    <lastmod>2025-04-27T18:34:42.310Z</lastmod>
+    <lastmod>2025-10-20T10:34:47.420Z</lastmod>
   </url>
   <url>
     <loc>https://miiip.github.io/publications.html</loc>
-    <lastmod>2025-04-27T18:34:42.330Z</lastmod>
+    <lastmod>2025-10-20T10:34:47.421Z</lastmod>
   </url>
   <url>
     <loc>https://miiip.github.io/posts/Gaussian.html</loc>
-    <lastmod>2025-04-27T18:51:20.503Z</lastmod>
+    <lastmod>2025-10-20T10:34:47.420Z</lastmod>
+  </url>
+  <url>
+    <loc>https://miiip.github.io/index.html</loc>
+    <lastmod>2025-10-20T10:34:47.416Z</lastmod>
+  </url>
+  <url>
+    <loc>https://miiip.github.io/about.html</loc>
+    <lastmod>2025-10-20T10:34:47.409Z</lastmod>
   </url>
 </urlset>
