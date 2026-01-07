@@ -1,27 +1,33 @@
 project:
   type: website
   output-dir: docs
+
 website:
   title: "Blog"
   site-url: "https://miiip.github.io"
-  description: "A blog about various applications of AI in cybersecurity and privacy"
+  description: "A blog about algorithms"
+
   navbar:
     right:
       - presentations.qmd
       - publications.qmd
       - about.qmd
-      - icon: github
-        href: https://github.com/miiip
-      - icon: twitter
-        href: https://twitter.com/miiipus
+
+      - icon: linkedin
+        href: https://www.linkedin.com/in/mihail-iulian-plesa-ab7838249/
+        aria-label: LinkedIn
+        target: _blank
+
+      - text: "{{< ai google-scholar size=lg >}}"
+        href: https://scholar.google.com/citations?user=dvlBs70AAAAJ&hl=en
+        aria-label: Google Scholar
+        target: _blank
+
       - icon: rss
         href: index.xml
+        aria-label: RSS feed
+
 format:
   html:
     theme: cosmo
     css: styles.css
-    include-after-body: _includes/comments.html
-
-
-
-

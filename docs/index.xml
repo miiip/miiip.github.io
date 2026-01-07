@@ -8,9 +8,97 @@
 <title>Blog</title>
 <link>https://miiip.github.io/</link>
 <atom:link href="https://miiip.github.io/index.xml" rel="self" type="application/rss+xml"/>
-<description>A blog about various applications of AI in cybersecurity and privacy</description>
+<description>A blog about algorithms</description>
 <generator>quarto-1.8.25</generator>
-<lastBuildDate>Sat, 26 Apr 2025 21:00:00 GMT</lastBuildDate>
+<lastBuildDate>Tue, 06 Jan 2026 22:00:00 GMT</lastBuildDate>
+<item>
+  <title>Algorithmic Foundations: Deep Dive into Combinatorial Analysis (Part 1)</title>
+  <dc:creator>Mihail Plesa</dc:creator>
+  <link>https://miiip.github.io/posts/Comb-1.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://miiip.github.io/posts/book.jpg" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:40.0%"></p>
+</figure>
+</div>
+<section id="a-holiday-dive-into-combinatorics" class="level2">
+<h2 class="anchored" data-anchor-id="a-holiday-dive-into-combinatorics">A Holiday Dive into Combinatorics</h2>
+<p>With a bit of free time on my hands during the holiday break, I decided to embark on a mathematical adventure into the foundations of combinatorial algorithms. And what better companion for this journey than the classic text, A Walk Through Combinatorics and Graph Theory by Miklós Bóna?</p>
+<p>I’ve made my way through the first few chapters, and in this post, I’ll share my take on them—presented with a twist. While the book itself is excellent, it can sometimes lean toward the formal side, making the underlying intuition a bit elusive. Nevertheless, its clear structure and step-by-step introduction of concepts make it a fantastic resource for beginners.</p>
+<p>So, if you’re ready to explore the world of combinatorics from a fresh perspective, join me on this walk! I hope you enjoy the journey as much as I did. 😊</p>
+</section>
+<section id="how-many-ways-can-mathematicians-line-up-for-coffee" class="level2">
+<h2 class="anchored" data-anchor-id="how-many-ways-can-mathematicians-line-up-for-coffee">How Many Ways Can Mathematicians Line Up for Coffee?</h2>
+<p>Let us commence our mathematical adventure with a deceptively simple question: Given <img src="https://latex.codecogs.com/png.latex?n"> individuals, in how many distinct ways can we arrange them in a single line? Imagine, if you will, a group of eager volunteers—perhaps mathematicians at a conference—awaiting their turn to stand in line for coffee.</p>
+<p>For the coveted first spot in the line, we have <img src="https://latex.codecogs.com/png.latex?n"> enthusiastic candidates. Once that position is filled, only <img src="https://latex.codecogs.com/png.latex?n-1"> hopefuls remain for the second spot, as one lucky individual is already sipping their metaphorical coffee at the front. This process continues, with each subsequent spot having one fewer option, until the final position, which is reserved for the last remaining person (who, let’s be honest, probably didn’t want to stand in line anyway).</p>
+<p>Multiplying these choices together, we obtain the grand total of possible arrangements:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20n%20%5Ctimes%20(n-1)%20%5Ctimes%20(n-2)%20%5Ctimes%20%5Ccdots%20%5Ctimes%202%20%5Ctimes%201%20"></p>
+<p>This mathematical mouthful is succinctly denoted as <img src="https://latex.codecogs.com/png.latex?n!"> (read as “n factorial”). In other words, <img src="https://latex.codecogs.com/png.latex?n!"> is the number of ways to organize <img src="https://latex.codecogs.com/png.latex?n"> unique individuals into a line—no coffee required, but a dash of combinatorial curiosity is highly recommended!</p>
+<p>By convention, we define <img src="https://latex.codecogs.com/png.latex?0!%20=%201">. At first glance, this might seem as peculiar as decaf coffee at a mathematicians’ conference, but let’s explore why this makes perfect sense.</p>
+<p>Imagine we have two coffee machines. In front of the first machine, there are <img src="https://latex.codecogs.com/png.latex?n"> mathematicians eagerly awaiting their caffeine fix, while <img src="https://latex.codecogs.com/png.latex?m"> mathematicians queue up at the second machine. The question arises: in how many ways can we form two separate lines, one for each machine? The answer is straightforward—there are <img src="https://latex.codecogs.com/png.latex?n!"> possible arrangements for the first line and <img src="https://latex.codecogs.com/png.latex?m!"> for the second, so the total number of ways to organize both lines is:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20n!%20%5Ctimes%20m!%20"></p>
+<p>Now, let’s introduce a plot twist. Suppose all <img src="https://latex.codecogs.com/png.latex?m"> mathematicians at the second coffee machine suddenly decide to abandon their quest for coffee and leave the line. The second line is now empty, but our original question remains: in how many ways can we form two lines? For the first machine, we still have <img src="https://latex.codecogs.com/png.latex?n!"> possible arrangements. For the second, with zero mathematicians, how many ways can we arrange an empty line? By our earlier formula, the answer must be:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20n!%20%5Ctimes%200!%20"></p>
+<p>But logically, there is exactly one way to arrange nothing at all—by doing nothing! Thus, for our formula to remain consistent, we must have <img src="https://latex.codecogs.com/png.latex?0!%20=%201">. It’s a mathematical nod to the power of nothingness: even an empty line counts as one arrangement!</p>
+</section>
+<section id="from-lineups-to-teams-counting-unique-combinations" class="level2">
+<h2 class="anchored" data-anchor-id="from-lineups-to-teams-counting-unique-combinations">From Lineups to Teams: Counting Unique Combinations</h2>
+<p>Now, let’s up the ante: suppose we wish to divide our <img src="https://latex.codecogs.com/png.latex?n"> mathematicians into <img src="https://latex.codecogs.com/png.latex?t"> disjoint teams. The first team will have <img src="https://latex.codecogs.com/png.latex?a_1"> members, the second team <img src="https://latex.codecogs.com/png.latex?a_2"> members, and so on, until the <img src="https://latex.codecogs.com/png.latex?t">-th team, which has <img src="https://latex.codecogs.com/png.latex?a_t"> members. Since no mathematician is allowed to clone themselves (yet), each person can only be in one team, so we must have:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20a_1%20+%20a_2%20+%20%5Ccdots%20+%20a_t%20=%20n%20"></p>
+<p>A natural question arises: in how many ways can we organize our <img src="https://latex.codecogs.com/png.latex?n"> mathematicians into these <img src="https://latex.codecogs.com/png.latex?t"> teams?</p>
+<p>One intuitive approach is to line up all the mathematicians in some order and then assign the first <img src="https://latex.codecogs.com/png.latex?a_1"> people to the first team, the next <img src="https://latex.codecogs.com/png.latex?a_2"> to the second team, and so on. Since there are <img src="https://latex.codecogs.com/png.latex?n!"> ways to arrange <img src="https://latex.codecogs.com/png.latex?n"> people in a line, it might be tempting to declare that there are <img src="https://latex.codecogs.com/png.latex?n!"> ways to form the teams.</p>
+<p>However, there’s a subtle catch: within each team, the order of the members doesn’t matter. The team consisting of Alice, Bob, and Eve is indistinguishable from the team of Bob, Eve, and Alice—unless, of course, you’re keeping score of who gets their coffee first.</p>
+<p>This means that our <img src="https://latex.codecogs.com/png.latex?n!"> possible lineups will generate many duplicate team configurations. Why? Because within each team, the order of the members doesn’t matter. For example, if the first team has <img src="https://latex.codecogs.com/png.latex?a_1"> members, any of the <img src="https://latex.codecogs.com/png.latex?a_1!"> ways to arrange those people among themselves will result in the exact same team. The same logic applies to the second team: there are <img src="https://latex.codecogs.com/png.latex?a_2!"> ways to rearrange its members without changing the team itself. This continues for each team, all the way up to the <img src="https://latex.codecogs.com/png.latex?t">-th team, which can be internally rearranged in <img src="https://latex.codecogs.com/png.latex?a_t!"> ways.</p>
+<p>To find the total number of duplicate arrangements, we multiply these possibilities together:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20a_1!%20%5Ctimes%20a_2!%20%5Ctimes%20%5Ccdots%20%5Ctimes%20a_t!%20"></p>
+<p>This product represents all the ways we can shuffle the members within each team, across all teams, without actually creating a new team configuration. So, to count only the truly distinct ways to form the teams, we divide the total number of lineups, <img src="https://latex.codecogs.com/png.latex?n!">, by this product:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20%5Cfrac%7Bn!%7D%7Ba_1!%20%5Ctimes%20a_2!%20%5Ctimes%20%5Ccdots%20%5Ctimes%20a_t!%7D%20"></p>
+<p>In other words, we’re correcting for all the “internal shuffling” that doesn’t change the teams themselves.</p>
+</section>
+<section id="choosing-subsets-when-order-doesnt-matter" class="level2">
+<h2 class="anchored" data-anchor-id="choosing-subsets-when-order-doesnt-matter">Choosing Subsets: When Order Doesn’t Matter</h2>
+<p>Now, let’s zoom in on a particularly famous case of our team-forming formula: the binomial coefficient. Some of you may already feel a sense of déjà vu!</p>
+<p>Suppose we set the number of teams to <img src="https://latex.codecogs.com/png.latex?t%20=%202">, and let the first team have <img src="https://latex.codecogs.com/png.latex?k"> members (that is, <img src="https://latex.codecogs.com/png.latex?a_1%20=%20k">). By necessity, the second team will have <img src="https://latex.codecogs.com/png.latex?n%20-%20k"> members, since <img src="https://latex.codecogs.com/png.latex?a_2%20=%20n%20-%20k">. Plugging these values into our earlier formula, we get:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20%5Cfrac%7Bn!%7D%7Bk!%20(n-k)!%7D%20"></p>
+<p>This expression is known as the binomial coefficient, and is commonly denoted as <img src="https://latex.codecogs.com/png.latex?%5Cbinom%7Bn%7D%7Bk%7D">. It represents the number of ways to choose a subset of <img src="https://latex.codecogs.com/png.latex?k"> individuals from a set of <img src="https://latex.codecogs.com/png.latex?n">—or, in less formal terms, the number of ways to assemble a team of <img src="https://latex.codecogs.com/png.latex?k"> mathematicians from a larger group of <img src="https://latex.codecogs.com/png.latex?n">.</p>
+<p>But why do we call this a “set”? Because, in a set, the order of the elements doesn’t matter—just as in our team-forming scenario above. Whether Alice, Bob, and Eve are chosen in that order or in any other, it’s the same team. So, <img src="https://latex.codecogs.com/png.latex?%5Cbinom%7Bn%7D%7Bk%7D"> counts the number of unordered groups of <img src="https://latex.codecogs.com/png.latex?k"> people you can select from <img src="https://latex.codecogs.com/png.latex?n"> candidates—a mathematical staple as classic as coffee at a conference!</p>
+</section>
+<section id="the-binomial-theorem-vowels-and-the-magic-of-counting-twice" class="level2">
+<h2 class="anchored" data-anchor-id="the-binomial-theorem-vowels-and-the-magic-of-counting-twice">The Binomial Theorem, Vowels, and the Magic of Counting Twice</h2>
+<p>Now, for my favorite part of this post: story proofs! Throughout our mathematical education—whether in high school, undergrad, or even grad school—we’re often presented with proofs that are formal, symbol-heavy, and, let’s be honest, sometimes a bit intimidating. But here’s the secret: you don’t always need a blizzard of symbols to make a proof rigorous. Sometimes, a good story is all you need.</p>
+<p>This idea is beautifully championed by Prof.&nbsp;Joe Blitzstein in his legendary Stat 110 course at Harvard. Instead of drowning in algebraic notation, let’s prove a classic result with a story. Consider the famous Binomial Theorem:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20(x%20+%20y)%5En%20=%20%5Csum_%7Bk=0%7D%5En%20%5Cbinom%7Bn%7D%7Bk%7D%20x%5Ek%20y%5E%7Bn-k%7D%20"></p>
+<p>Don’t ask me for a “standard” proof—I’m not sure I know one! But I can offer a proof that’s intuitive, makes perfect sense, and is as solid as any formal argument.</p>
+<p>The Story:</p>
+<p>Suppose you have a vocabulary of size <img src="https://latex.codecogs.com/png.latex?v">. How many <img src="https://latex.codecogs.com/png.latex?n">-letter words can you form using this vocabulary? For each letter in the word, you have <img src="https://latex.codecogs.com/png.latex?v"> choices, so the total number of possible words is simply <img src="https://latex.codecogs.com/png.latex?v%5En">.</p>
+<p>Now, let’s count the same thing in a more nuanced way. Suppose your vocabulary consists of <img src="https://latex.codecogs.com/png.latex?x"> vowels and <img src="https://latex.codecogs.com/png.latex?y"> consonants, so <img src="https://latex.codecogs.com/png.latex?x%20+%20y%20=%20v">. Let’s ask: how many <img src="https://latex.codecogs.com/png.latex?n">-letter words have exactly <img src="https://latex.codecogs.com/png.latex?k"> vowels, and those vowels are placed at specific positions <img src="https://latex.codecogs.com/png.latex?i_1,%20i_2,%20%5Cldots,%20i_k">?</p>
+<p>For each of these <img src="https://latex.codecogs.com/png.latex?k"> positions, you have <img src="https://latex.codecogs.com/png.latex?x"> choices (any vowel), so there are <img src="https://latex.codecogs.com/png.latex?x%5Ek"> ways to assign vowels to those spots. For the remaining <img src="https://latex.codecogs.com/png.latex?n-k"> positions, each can be filled with any of the <img src="https://latex.codecogs.com/png.latex?y"> consonants, giving <img src="https://latex.codecogs.com/png.latex?y%5E%7Bn-k%7D"> possibilities. So, for a fixed set of <img src="https://latex.codecogs.com/png.latex?k"> positions for the vowels, there are <img src="https://latex.codecogs.com/png.latex?x%5Ek%20y%5E%7Bn-k%7D"> possible words.</p>
+<p>But how many ways can we choose which <img src="https://latex.codecogs.com/png.latex?k"> positions will be occupied by vowels? That’s exactly <img src="https://latex.codecogs.com/png.latex?%5Cbinom%7Bn%7D%7Bk%7D">, the number of ways to choose <img src="https://latex.codecogs.com/png.latex?k"> positions out of <img src="https://latex.codecogs.com/png.latex?n">.</p>
+<p>Therefore, the total number of <img src="https://latex.codecogs.com/png.latex?n">-letter words with exactly <img src="https://latex.codecogs.com/png.latex?k"> vowels (regardless of where they appear) is:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20%5Cbinom%7Bn%7D%7Bk%7D%20x%5Ek%20y%5E%7Bn-k%7D%20"></p>
+<p>To find the total number of <img src="https://latex.codecogs.com/png.latex?n">-letter words (with any number of vowels from <img src="https://latex.codecogs.com/png.latex?0"> to <img src="https://latex.codecogs.com/png.latex?n">), we sum over all possible values of <img src="https://latex.codecogs.com/png.latex?k">:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20%5Csum_%7Bk=0%7D%5En%20%5Cbinom%7Bn%7D%7Bk%7D%20x%5Ek%20y%5E%7Bn-k%7D%20"></p>
+<p>But we already know, from our earlier calculation, that the total number of <img src="https://latex.codecogs.com/png.latex?n">-letter words is <img src="https://latex.codecogs.com/png.latex?v%5En">, where <img src="https://latex.codecogs.com/png.latex?v%20=%20x%20+%20y">. So, by counting the same thing in two different ways, we arrive at:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20(x%20+%20y)%5En%20=%20%5Csum_%7Bk=0%7D%5En%20%5Cbinom%7Bn%7D%7Bk%7D%20x%5Ek%20y%5E%7Bn-k%7D%20"></p>
+<p>And there you have it—a proof that’s as satisfying as finding the last piece of a mathematical puzzle, all thanks to a story about vowels, consonants, and the magic of counting!</p>
+</section>
+<section id="counting-is-just-the-beginning" class="level2">
+<h2 class="anchored" data-anchor-id="counting-is-just-the-beginning">Counting is Just the Beginning</h2>
+<p>This post covered the first part of the book, focusing on the art and science of counting. But don’t put away your mathematical curiosity just yet—there’s much more to explore! Stay tuned for the next chapters, where we’ll dive even deeper into the fascinating world of combinatorics and beyond. 😊</p>
+
+
+</section>
+
+ ]]></description>
+  <category>foundations</category>
+  <guid>https://miiip.github.io/posts/Comb-1.html</guid>
+  <pubDate>Tue, 06 Jan 2026 22:00:00 GMT</pubDate>
+</item>
 <item>
   <title>A Shred of Light on the Smoothing Parameter in Lattices</title>
   <dc:creator>Mihail Plesa</dc:creator>
@@ -1937,7 +2025,7 @@ font-style: inherit;">'Real Part of Basis Function'</span>)</span>
 </section>
 
  ]]></description>
-  <category>foundations-cryptography</category>
+  <category>cryptography</category>
   <guid>https://miiip.github.io/posts/Gaussian.html</guid>
   <pubDate>Sat, 26 Apr 2025 21:00:00 GMT</pubDate>
 </item>

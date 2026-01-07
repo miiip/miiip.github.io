@@ -1,24 +1,10 @@
 ```{=html}
-<h2> Journal articles </h2>  
-<ul>
+<ol>
 <% for (const item of items) { %>
-  <% if(item.type == "journal") { %>
-    <li>
-        <a href="<%- item.href %>"><%= item.name %></a><br/>
-    </li>
-  <% } %>
- 
+  <li>
+    <a href="<%- item.href %>"><%= item.name %></a><br/>
+  </li>
 <% } %>
-</ul>
-<h2> Conference articles </h2>  
-<ul>
-    <% for (const item of items) { %>
-      <% if(item.type == "conference") { %>
-        <li>
-            <a href="<%- item.href %>"><%= item.name %></a><br/>
-        </li>
-      <% } %>
-     
-    <% } %>
-</ul>
+</ol>
+
 ```

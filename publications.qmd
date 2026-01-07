@@ -2,31 +2,62 @@
 title: "Publications"
 listing:
   template: publications.ejs
-  contents: 
-    - name: Hybrid scheme for secure communications using quantum and classical mechanisms
-      href: https://ieeexplore.ieee.org/document/8166458
-      type: conference
-    - name: A New Quantum Encryption Scheme
-      href: https://journals.aijr.org/index.php/ajgr/article/view/699/168
-      type: journal
-    - name: Using quantum communications for maritime signal flags
-      href: https://www.researchgate.net/publication/355884306_Using_quantum_communications_for_maritime_signal_flags
-      type: conference
-    - name: A quantum safe analysis of Helios voting system
-      href: https://acad.ro/sectii2002/proceedings/doc2020-1/07-Plesa.pdf
-      type: journal
-    - name: "Privacy-Preserving Clustering: A New Approach Based on Invariant Order Encryption"
-      href: https://jmiltechnol.mta.ro/6/10_PLESA,%20PLESCA-min.pdf
-      type: journal
-    - name: Self-repairing mechanical components using artificial Intelligence
-      href: https://www.researchgate.net/publication/355264476_Self-repairing_mechanical_components_using_artificial_Intelligence
-      type: journal
-    - name: Anonymous Spam Detection Service Based on Somewhat Homomorphic Encryption
-      href: https://ijisrt.com/assets/upload/files/IJISRT21APR375.pdf
-      type: journal
-    - name: A key agreement protocol based on spiking neural P systems with anti-spikes
-      href: https://link.springer.com/article/10.1007/s41965-022-00110-9
-      type: journal
-    
----
+  contents:
 
+    - name: "Pleșa, M.I., Gheorghe, M. and Ipate, F. (2025) <em>Neural Key Agreement Protocol with Extended Security</em>. Applied Sciences, 15(23), 12746."
+      href: /papers/neural-key-agreement-protocol-with-extended-security.pdf
+
+    - name: "Pleșa, M.I., Poenaru, R., Irimia, S., David, S. and Farcasanu, A. (2025) <em>Privacy-Preserving Inference for Public Neural Networks</em>. In: International Conference on Artificial Intelligence and Soft Computing, pp. 120–131."
+      href: /papers/privacy-preserving-inference-for-public-neural-networks.pdf
+
+    - name: "David, S., Pleșa, M.I., Irimia, S. and Poenaru, R. (2025) <em>Privacy-Preserving Service for Secure Storage of Passwords Based on Singularization</em>. In: 25th International Conference on Control Systems and Computer Science (CSCS 2025)."
+      href: /papers/privacy-preserving-service-for-secure-storage-of-passwords-based-on-singularization.pdf
+
+    - name: "Macario-Rat, G. and Pleșa, M.I. (2024) <em>Singularization: A New Approach to Designing Block Ciphers for Resource-Constrained Devices</em>. In: International Conference on Attacks and Defenses for Internet-of-Things, pp. 155–167."
+      href: /papers/singularization-a-new-approach-to-designing-block-ciphers-for-resource-constrained-devices.pdf
+
+    - name: "Zhang, G., Verlan, S., Wu, T., Cabarle, F.G.C., Xue, J., Orellana-Martín, D., Dong, J. et al. (2024) <em>Spiking neural P systems: theory, applications and implementations</em>. Springer Nature."
+      href: /papers/spiking-neural-p-systems-theory-applications-and-implementations.pdf
+
+    - name: "Pleșa, M.I., Gheorghe, M., Ipate, F. and Zhang, G. (2024) <em>Applications of spiking neural P systems in cybersecurity</em>. Journal of Membrane Computing, 6(4), pp. 310–317."
+      href: /papers/applications-of-spiking-neural-p-systems-in-cybersecurity.pdf
+
+    - name: "Pleșa, M.I., Gheorghe, M., Ipate, F. and Zhang, G. (2024) <em>A federated learning protocol for spiking neural membrane systems</em>. International Journal of Neural Systems, 34(12), 2450062."
+      href: /papers/a-federated-learning-protocol-for-spiking-neural-membrane-systems.pdf
+
+    - name: "Pleșa, M.I. and Olimid, R.F. (2024) <em>Privacy-Preserving Multi-party Search via Homomorphic Encryption with Constant Multiplicative Depth</em>. In: International Conference on Information Technology and Communications Security (SecITC 2024)."
+      href: /papers/privacy-preserving-multi-party-search-via-homomorphic-encryption-with-constant-multiplicative-depth.pdf
+
+    - name: "Pleșa, M.I., Gheorghe, M. and Ipate, F. (2024) <em>Private Inference on Layered Spiking Neural P Systems</em>. In: International Work-Conference on the Interplay Between Natural and Artificial Computation (IWINAC 2024)."
+      href: /papers/private-inference-on-layered-spiking-neural-p-systems.pdf
+
+    - name: "Zentai, D., Pleșa, M.I. and Frot, R. (2023) <em>A multiparty commutative hashing protocol based on the discrete logarithm problem</em>. arXiv:2311.17498."
+      href: /papers/a-multiparty-commutative-hashing-protocol-based-on-the-discrete-logarithm-problem.pdf
+
+    - name: "Pleșa, M.I., Gheorghe, M. and Ipate, F. (2023) <em>Privacy-preserving Linear Computations in Spiking Neural P Systems</em>. arXiv:2309.13803."
+      href: /papers/privacy-preserving-linear-computations-in-spiking-neural-p-systems.pdf
+
+    - name: "Pleșa, M.I., Gheorghe, M., Ipate, F. and Zhang, G. (2022) <em>A key agreement protocol based on spiking neural P systems with anti-spikes</em>. Journal of Membrane Computing, 4(4), pp. 341–351."
+      href: /papers/a-key-agreement-protocol-based-on-spiking-neural-p-systems-with-anti-spikes.pdf
+
+    - name: "Ion, B. and Pleșa, M.I. (2021) <em>Anonymous Spam Detection Service Based on Somewhat Homomorphic Encryption</em>. International Journal of Innovative Science and Research Technology, 6(4)."
+      href: /papers/anonymous-spam-detection-service-based-on-somewhat-homomorphic-encryption.pdf
+
+    - name: "Pleșa, M.I. and Pleșa, M.C. (2021) <em>Self-repairing mechanical components using artificial intelligence</em>. Scientific Bulletin ‘Mircea cel Batran’ Naval Academy, 24(1), pp. 17–28."
+      href: /papers/self-repairing-mechanical-components-using-artificial-intelligence.pdf
+
+    - name: "Pleșa, M.I. and Pleșca, C. (2020) <em>Privacy-Preserving Clustering: A New Approach Based on Invariant Order Encryption</em>. Journal of Military Technology, 3(2)."
+      href: /papers/privacy-preserving-clustering-a-new-approach-based-on-invariant-order-encryption.pdf
+
+    - name: "Pleșa, M.I. (2020) <em>A quantum safe analysis of Helios voting system</em>."
+      href: /papers/a-quantum-safe-analysis-of-helios-voting-system.pdf
+
+    - name: "Maria-Carmen, P. and Mihail-Iulian, P. (2019) <em>Using quantum communications for maritime signal flags</em>. Scientific Bulletin ‘Mircea cel Batran’ Naval Academy, 22(1)."
+      href: /papers/using-quantum-communications-for-maritime-signal-flags.pdf
+
+    - name: "Pleșa, M.I. and Mihai, T. (2018) <em>A New Quantum Encryption Scheme</em>. Journal of Graduate Research, 4(1), p. 44."
+      href: /papers/a-new-quantum-encryption-scheme-adv.pdf
+
+    - name: "Pleșa, M.I. (2017) <em>Hybrid scheme for secure communications using quantum and classical mechanisms</em>. In: 9th International Conference on Electronics, Computers and Artificial Intelligence (ECAI 2017)."
+      href: /papers/hybrid-scheme-for-secure-communications-using-quantum-and-classical-mechanisms.pdf
+---
