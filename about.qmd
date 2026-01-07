@@ -4,11 +4,9 @@ image: profile.jpeg
 about:
   template: jolla
   links:
-    - icon: linkedin
-      text: LinkedIn
+    - text: LinkedIn
       href: https://www.linkedin.com/in/mihail-iulian-plesa-ab7838249/
-    - icon: linkedin
-      text: Google Scholar
+    - text: Google Scholar
       href: https://scholar.google.com/citations?user=dvlBs70AAAAJ&hl=en
 
 ---
